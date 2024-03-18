@@ -1,34 +1,137 @@
 <!doctype html>
-<title>{% block title %}{% endblock %} - Flaskr</title>
+<title>PathFinder</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap" rel="stylesheet">
 <body>
     <div class="full-body-container">
-        <div class="top-text">
+        <div class="main_display_container">
             <div class="pathFinderTitle">
-                Pathfinder
+                <img src="{{ url_for('static', filename='images/PathFinderLogo.png') }}" />
+                <div class="subtitleText">
+                    Over 250,000 jobs looking for applicants
+                </div>
             </div>
-            <div class="input-box jobTitle" onclick="sendFocus()">
-                <img src="{{ url_for('static', filename='images/mag.png') }}" />
-                <input placeholder="Enter Job Title" id="filter-text-val" onkeyup="filterText()">
-            </div>
-            <div class="input-box jobDescription" onclick="sendFocus()">
-                <input placeholder="Enter Job Description" id="filter-text-val" onkeyup="filterText()">
-            </div>
-            <div class="input-box payRange" onclick="sendFocus()">
-                <input placeholder="250000" type="range" id="filter-text-val" onkeyup="filterText()">
-            </div>
+            <form class="input_form">
+                <div class="lhs form_column">
+                    <div class="input-box jobTitle fadeIn" >
+                        <img src="{{ url_for('static', filename='images/mag.png') }}" />
+                        <input placeholder="Enter Job Title" id="jobTitle" >
+                    </div>
+                    <div class="input-box jobDescription description fadeIn" >
+                        <input placeholder="Enter Job Description" id="jobDescription"  >
+                    </div>
+                    <div class="input-box companyDescription description fadeIn" >
+                        <input placeholder="Enter Company Description" id="companyDescription" >
+                    </div>
+                </div>
+                <div class="rhs form_column">
+                    <div class="salaryRangeContainer fadeIn">
+                        <h4>What is your ideal salary?</h4>
+                        <div class="input-box payRange ">
+                            <input class="slider" value="250000" id="salaryRange" oninput="this.nextElementSibling.value = `${'$'+this.value}`" min="10000" max="1000000" type="range" id="filter-text-val" >
+                            <output>$250000</output>
+
+                        </div>
+                    </div>
+                    
+                    
+
+                    <div class="citySelectContainer fadeIn">
+                        <div>
+                            <h4>Please Choose a City</h4>
+                        </div>
+                    
+                        <fieldset class="citySelect ">
+                            <label>
+                            Cities
+                            </label>
+                            <select id="myCity" name="myCity">
+                                <option value="None">Select a City</option>
+                                <option value="PHI">Philadelphia, PA</option>
+                                <option value="NYC">New York, PA</option>
+                                <option value="TMP">Tampa, FL</option>
+                                <option value="HAR">Hartford, CT</option>
+                                
+                            </select>
+                        </fieldset>
+                    </div>
+
+                    <div class="input-box experienceAndSkills description fadeIn" >
+                        <input placeholder="Experience and Skills" id="userExperienceAndSkills" >
+                    </div>
+                     
+                    
+                </div>
+                        
+                        
+                        <!-- <div id="map"></div> -->
+                        
+            
+        </form>
+  
+        <button class="searchBtn" id="searchButton">
+            Search
+        </button>
+     
            
         </div>
         <div id="answer-box">
 
         </div>
     </div>
+    <script>    
+    formFieldValues = {}
+    
+        // Function to check if all fields are filled. Also updates the form field values
+            function checkAndPopulateFields() {
+                let jobTitle = document.getElementById("jobTitle").value.trim();
+                let jobDescription = document.getElementById("jobDescription").value.trim();
+                let companyDescription = document.getElementById("companyDescription").value.trim();
+                let salaryRange = document.getElementById("salaryRange").value;
+                let myCity = document.getElementById("myCity").value;
+                let userExperienceAndSkills = document.getElementById('userExperienceAndSkills').value;
+                
+                 // Populate formFieldValues object with field values
+                formFieldValues.jobTitle = jobTitle;
+                formFieldValues.jobDescription = jobDescription;
+                formFieldValues.companyDescription = companyDescription;
+                formFieldValues.salaryRange = salaryRange;
+                formFieldValues.myCity = myCity;
+                formFieldValues.userExperienceAndSkills = userExperienceAndSkills;
+                // Check if any field is empty
+                if (jobTitle === "" || jobDescription === "" || companyDescription === "" || salaryRange === "" || myCity === "None" || userExperienceAndSkills ==='') {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
 
-    <script>
+            // Function to update button color
+            function updateButtonColor() {
+                let searchButton = document.getElementById("searchButton");
 
+                if (checkAndPopulateFields()) {
+                    // All fields are filled, change button color
+                    searchButton.style.backgroundColor = "var(--linkedInBlue)";
+                } else {
+                    // At least one field is empty, reset button color
+                    searchButton.style.backgroundColor = "gray";
+                }
+            }
+
+            // Call updateButtonColor() on input change
+            document.addEventListener("input", updateButtonColor);
+
+            // Initial call to set button color on page load
+            updateButtonColor();
+
+            // Function to update output value for salary range
+            function updateOutputValue(value) {
+                document.getElementById("salaryOutput").textContent = "$" + value;
+            }
+       
         function answerBoxTemplate(title,titleDesc,rating){
             return `<div class=''>
                 <h3 class='episode-title'>${title}</h3>
@@ -37,23 +140,44 @@
             </div>`
         }
 
-        function sendFocus(){
-            document.getElementById('filter-text-val').focus()
-        }
+    
 
-        function filterText(){
+        function searchJobs(){
+            console.log("SEARCHING JOBS")
             document.getElementById("answer-box").innerHTML = ""
-            console.log(document.getElementById("filter-text-val").value)
-            fetch("/episodes?" + new URLSearchParams({ title: document.getElementById("filter-text-val").value }).toString())
+            fetch("/episodes?" + new URLSearchParams({ title: formFieldValues.jobTitle }).toString())
             .then((response) => response.json())
-            .then((data) => data.forEach(row => {
+            .then((data) => {data.forEach(row => {
                 
                 let tempDiv = document.createElement("div")
                 tempDiv.innerHTML = answerBoxTemplate(row.title,row.descr,row.imdb_rating)
                 document.getElementById("answer-box").appendChild(tempDiv)
-            }));
+            })
+                if(!data || data.length==0){
+                    let tempDiv = document.createElement("div")
+                    tempDiv.innerHTML = 'No Results Found'
+                    document.getElementById("answer-box").appendChild(tempDiv)
+
+                }
+                document.getElementById("answer-box").scrollIntoView({behavior:"smooth"})
+            }
+            );
 
         }
+
+          // Function to check fields and filter text
+          function checkAndSearch() {
+            if (checkAndPopulateFields()) {
+                searchJobs();
+            } else {
+                // Handle case where fields are not filled
+                console.log("Please fill out all fields before searching.");
+            }
+        }
+
+        // Add click event listener to the search button
+        document.getElementById("searchButton").addEventListener("click", checkAndSearch);
+
             
     </script>
 </body>
