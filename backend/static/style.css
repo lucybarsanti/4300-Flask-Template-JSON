@@ -9,39 +9,18 @@
     display: flex;
     justify-content: start;
     align-items: center;
+    --linkedInBlue:rgba (10, 102,194, 1),
     flex-direction: column;
+    font-family:sans-serif
 }
 
-#google-c{
-    color:#4285F4;
-}
-
-#google-s{
-    color:#DB4437;
-}
-
-#google-4{
-    color:	#F4B400;
-}
-
-#google-3{
-    color:	#4285F4;
-}
-
-#google-0-1{
-    color:	#0F9D58;
-}
-
-#google-0-2{
-    color:#DB4437;
-}
-
-.google-colors{
+.pathFinderTitle{
     display: flex;
     align-items: center;
     font-size: 48px;
     font-family: 'Open Sans', sans-serif;
 }
+
 
 .google-colors h1{
     margin-bottom: 0;
@@ -56,6 +35,11 @@
     margin-top: 10px;
     padding:12px;
     width: 600px;
+}
+
+.input-box.jobDescription{
+    height:200px;
+    align-items:start
 }
 
 .input-box img{
