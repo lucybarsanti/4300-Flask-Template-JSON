@@ -167,19 +167,24 @@
                 console.log(data);
                 const uniqueIndustries = new Set();
                 industryColors=[]
-
+                let prevColor = ''
                 data.forEach(row => {
                 
                 let tempDiv = document.createElement("div")
                 tempDiv.classList.add('fadeIn')
                 tempDiv.classList.add('indvRsltContainer')
-                let curIndustry = ''
-                let prevColor = ''
+                
                 if(uniqueIndustries.has(row.industry)){
 
                 } else{
                     console.log("GEN CONTAINER DIV", row)
+
                     let col = `var(--col_${Math.floor(Math.random() * 4) + 1})`;
+                    while (col==prevColor){
+                        console.log("EQUALS PREV COLOR")
+                        col = `var(--col_${Math.floor(Math.random() * 4) + 1})`;
+                    }
+                    prevColor=col;
                     industryColors.push({industry: row.industry, industryNum: industryColors.length+1, color:col})
                     uniqueIndustries.add(row.industry)
                     let containerDiv = document.createElement("div")
@@ -194,7 +199,7 @@
                     industryTitleContainer.classList.add('industryTitle')
                     industryTitleContainer.innerHTML=row.industry
                     document.getElementById(row.industry).appendChild(industryTitleContainer)
-
+                    
 
                 }
                 

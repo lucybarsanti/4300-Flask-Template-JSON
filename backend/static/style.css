@@ -39,9 +39,11 @@ transition:all 0.2s ease}
 }
 
 .industryTitle{
-    font-size: 44px;
-    font-weight: 500;
+    font-size: 29px;
+    font-weight: 100;
+    border-bottom: solid 0.5px #ffffff78;
     color: white;
+    margin-bottom: 10px;
     font-family: sans-serif;
 }
 
