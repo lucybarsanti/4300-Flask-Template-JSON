@@ -10,70 +10,85 @@
             <div class="pathFinderTitle">
                 <img src="{{ url_for('static', filename='images/PathFinderLogo.png') }}" />
                 <div class="subtitleText">
-                    Over 250,000 jobs looking for applicants
+                    Helping professionals find their path was a purpose
                 </div>
             </div>
-            <form class="input_form">
-                <div class="lhs form_column">
-                    <div class="input-box jobTitle fadeIn" >
-                        <img src="{{ url_for('static', filename='images/mag.png') }}" />
-                        <input placeholder="Enter Job Title" id="jobTitle" >
-                    </div>
-                    <div class="input-box jobDescription description fadeIn" >
-                        <input placeholder="Enter Job Description" id="jobDescription"  >
-                    </div>
-                    <div class="input-box companyDescription description fadeIn" >
-                        <input placeholder="Enter Company Description" id="companyDescription" >
-                    </div>
-                </div>
-                <div class="rhs form_column">
-                    <div class="salaryRangeContainer fadeIn">
-                        <h4>What is your ideal salary?</h4>
-                        <div class="input-box payRange ">
-                            <input class="slider" value="250000" id="salaryRange" oninput="this.nextElementSibling.value = `${'$'+this.value}`" min="10000" max="1000000" type="range" id="filter-text-val" >
-                            <output>$250000</output>
-
+        <div class="formAndSearchContainer">
+            <form class="input_form_container">
+                <div class="input_form">
+                    <div class="lhs form_column">
+                        <!-- <div class="input-box jobTitle fadeIn" >
+                            <img src="{{ url_for('static', filename='images/mag.png') }}" />
+                            <input placeholder="Enter Job Title" id="jobTitle" >
+                        </div> -->
+                        <div class="input-box jobDescription description fadeIn" >
+                            <img src="{{ url_for('static', filename='images/mag.png') }}" />
+                            <input placeholder="Enter Career/Personal Values" id="jobDescription"  >
                         </div>
+                        
+                       
                     </div>
-                    
-                    
-
-                    <div class="citySelectContainer fadeIn">
-                        <div>
-                            <h4>Please Choose a City</h4>
-                        </div>
-                    
-                        <fieldset class="citySelect ">
-                            <label>
-                            Cities
-                            </label>
-                            <select id="myCity" name="myCity">
-                                <option value="None">Select a City</option>
-                                <option value="PHI">Philadelphia, PA</option>
-                                <option value="NYC">New York, PA</option>
-                                <option value="TMP">Tampa, FL</option>
-                                <option value="HAR">Hartford, CT</option>
-                                
-                            </select>
-                        </fieldset>
-                    </div>
-
-                    <div class="input-box experienceAndSkills description fadeIn" >
-                        <input placeholder="Experience and Skills" id="userExperienceAndSkills" >
-                    </div>
+                    <div class="rhs form_column">
                      
-                    
+                        <div class="input-box companyDescription description fadeIn" >
+                            <img src="{{ url_for('static', filename='images/mag.png') }}" />
+                            <input placeholder="Enter Personal Skills/Experience" id="companyDescription" >
+                        </div>
+                        
+                        
+    
+                        <!-- <div class="citySelectContainer fadeIn">
+                            <div>
+                                <h4>Please Choose a City</h4>
+                            </div>
+                        
+                            <fieldset class="citySelect ">
+                                <label>
+                                Cities
+                                </label>
+                                <select id="myCity" name="myCity">
+                                    <option value="None">Select a City</option>
+                                    <option value="PHI">Philadelphia, PA</option>
+                                    <option value="NYC">New York, PA</option>
+                                    <option value="TMP">Tampa, FL</option>
+                                    <option value="HAR">Hartford, CT</option>
+                                    
+                                </select>
+                            </fieldset>
+                        </div> -->
+    <!-- 
+                        <div class="input-box experienceAndSkills description fadeIn" >
+                            <input placeholder="Experience and Skills" id="userExperienceAndSkills" >
+                        </div> -->
+                         
+                        
+                    </div>
                 </div>
+           
                         
                         
                         <!-- <div id="map"></div> -->
-                        
+                <!-- <div class="salaryRangeContainer fadeIn">
+                            <h4>What is your ideal salary?</h4>
+                            <div class="input-box payRange ">
+                                <input class="slider" value="250000" id="salaryRange" oninput="this.nextElementSibling.value = `${'$'+this.value}`" min="10000" max="1000000" type="range" id="filter-text-val" >
+                                <output>$250000</output>
+    
+                            </div>
+                </div> -->
             
-        </form>
+            </form>
+        <div class="examplesContainer fadeIn">
+            <div class="example one fadeIn"></div>
+            <div class="example two fadeIn"></div>
+            <div class="example three fadeIn"></div>
+        </div>
   
-        <button class="searchBtn" id="searchButton">
+        <button class="searchBtn fadeIn" id="searchButton">
             Search
         </button>
+        </div>
+           
      
            
         </div>
