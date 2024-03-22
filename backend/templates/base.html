@@ -21,18 +21,18 @@
                             <img src="{{ url_for('static', filename='images/mag.png') }}" />
                             <input placeholder="Enter Job Title" id="jobTitle" >
                         </div> -->
-                        <div class="input-box jobDescription description fadeIn" >
+                        <div class="input-box jobDescription description fadeIn" id="personalValues_inputBox">
                             <img src="{{ url_for('static', filename='images/mag.png') }}" />
-                            <input placeholder="Enter Career/Personal Values" id="jobDescription"  >
+                            <input placeholder="Enter Career/Personal Values" id="personalValues"  >
                         </div>
                         
                        
                     </div>
                     <div class="rhs form_column">
                      
-                        <div class="input-box companyDescription description fadeIn" >
+                        <div class="input-box companyDescription description fadeIn" id="personalSkills_inputBox">
                             <img src="{{ url_for('static', filename='images/mag.png') }}" />
-                            <input placeholder="Enter Personal Skills/Experience" id="companyDescription" >
+                            <input placeholder="Enter Personal Skills/Experience" id="personalSkills" >
                         </div>
                         
                         
@@ -79,7 +79,9 @@
             
             </form>
         <div class="examplesContainer fadeIn">
-            <div class="example one fadeIn"></div>
+            <div class="example one fadeIn">
+
+            </div>
             <div class="example two fadeIn"></div>
             <div class="example three fadeIn"></div>
         </div>
@@ -101,22 +103,16 @@
     
         // Function to check if all fields are filled. Also updates the form field values
             function checkAndPopulateFields() {
-                let jobTitle = document.getElementById("jobTitle").value.trim();
-                let jobDescription = document.getElementById("jobDescription").value.trim();
-                let companyDescription = document.getElementById("companyDescription").value.trim();
-                let salaryRange = document.getElementById("salaryRange").value;
-                let myCity = document.getElementById("myCity").value;
-                let userExperienceAndSkills = document.getElementById('userExperienceAndSkills').value;
+                let personalValues = document.getElementById("personalValues").value.trim();
+                let personalSkills = document.getElementById("personalSkills").value.trim();
+
                 
                  // Populate formFieldValues object with field values
-                formFieldValues.jobTitle = jobTitle;
-                formFieldValues.jobDescription = jobDescription;
-                formFieldValues.companyDescription = companyDescription;
-                formFieldValues.salaryRange = salaryRange;
-                formFieldValues.myCity = myCity;
-                formFieldValues.userExperienceAndSkills = userExperienceAndSkills;
+                formFieldValues.personalValues = personalValues;
+                formFieldValues.personalSkills = personalSkills;
+                
                 // Check if any field is empty
-                if (jobTitle === "" || jobDescription === "" || companyDescription === "" || salaryRange === "" || myCity === "None" || userExperienceAndSkills ==='') {
+                if (personalValues === "" || personalSkills === "") {
                     return false;
                 } else {
                     return true;
@@ -142,12 +138,12 @@
             // Initial call to set button color on page load
             updateButtonColor();
 
-            // Function to update output value for salary range
-            function updateOutputValue(value) {
-                document.getElementById("salaryOutput").textContent = "$" + value;
-            }
+            // // Function to update output value for salary range
+            // function updateOutputValue(value) {
+            //     document.getElementById("salaryOutput").textContent = "$" + value;
+            // }
        
-        function answerBoxTemplate(title,titleDesc,rating){
+        function answerBoxTemplate(title,industry,titleDesc,rating){
             return `<div class='answer_resp'>
                 <h3 class='episode-title'>${title}</h3>
                 <p class='episode-desc'>${titleDesc}</p>
@@ -156,18 +152,55 @@
         }
 
     
+        
+        /**
+         * industry: string, industryNum: number, color:string
+         */
+        industryConfig=[]
 
         function searchJobs(){
             console.log("SEARCHING JOBS")
             document.getElementById("answer-box").innerHTML = ""
-            fetch("/episodes?" + new URLSearchParams({ title: formFieldValues.jobTitle }).toString())
+            fetch("/episodes?" + new URLSearchParams({ title: formFieldValues.personalSkills }).toString())
             .then((response) => response.json())
-            .then((data) => {data.forEach(row => {
+            .then((data) => {
+                console.log(data);
+                const uniqueIndustries = new Set();
+                industryColors=[]
+
+                data.forEach(row => {
                 
                 let tempDiv = document.createElement("div")
                 tempDiv.classList.add('fadeIn')
-                tempDiv.innerHTML = answerBoxTemplate(row.title,row.descr,row.imdb_rating)
-                document.getElementById("answer-box").appendChild(tempDiv)
+                tempDiv.classList.add('indvRsltContainer')
+                let curIndustry = ''
+                let prevColor = ''
+                if(uniqueIndustries.has(row.industry)){
+
+                } else{
+                    console.log("GEN CONTAINER DIV", row)
+                    let col = `var(--col_${Math.floor(Math.random() * 4) + 1})`;
+                    industryColors.push({industry: row.industry, industryNum: industryColors.length+1, color:col})
+                    uniqueIndustries.add(row.industry)
+                    let containerDiv = document.createElement("div")
+                    containerDiv.classList.add('fadeIn')
+                    containerDiv.classList.add('industryRsltContainer')
+                    containerDiv.id=row.industry
+                    
+                    containerDiv.style='--color:'+col
+                    document.getElementById("answer-box").appendChild(containerDiv)
+
+                    let industryTitleContainer = document.createElement("div")
+                    industryTitleContainer.classList.add('industryTitle')
+                    industryTitleContainer.innerHTML=row.industry
+                    document.getElementById(row.industry).appendChild(industryTitleContainer)
+
+
+                }
+                
+                
+                tempDiv.innerHTML = answerBoxTemplate(row.title,row.industry,row.descr,row.imdb_rating)
+                document.getElementById(row.industry).appendChild(tempDiv)
             })
                 if(!data || data.length==0){
                     let tempDiv = document.createElement("div")
@@ -191,9 +224,25 @@
             }
         }
 
+        function focusInput(inputToFocus){
+            console.log("FOCUSED")
+            document.getElementById(inputToFocus).focus();
+        }
+
         // Add click event listener to the search button
         document.getElementById("searchButton").addEventListener("click", checkAndSearch);
 
+
+      // Use anonymous function to delay execution of focusInput
+        document.getElementById("personalValues_inputBox").addEventListener("click", function() {
+            focusInput('personalValues');
+        });
+
+        document.getElementById("personalSkills_inputBox").addEventListener("click", function() {
+            focusInput('personalSkills');
+        });
+
+        
             
     </script>
 </body>

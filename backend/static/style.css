@@ -1,5 +1,48 @@
 body{
     background: gainsboro;
+    --cerulean: #227c9dff;
+    --light-sea-green: #17c3b2ff;
+    --sunset: #ffcb77ff;
+    --light-red: #fe6d73ff;
+
+    --col_1:var(--cerulean);
+    --col_2:var(--light-sea-green);
+    --col_3:var(--sunset);
+    --col_4:var(--light-red);
+}
+
+.indvRsltContainer{
+    cursor:pointer;
+transition:all 0.2s ease}
+
+.answer_resp{
+    transform:scale(1); 
+    transition:all 0.2s ease
+}
+.indvRsltContainer:hover .answer_resp{
+    transform: scale(1.025);
+}
+
+.industryRsltContainer{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    position: static;
+    gap: 8px;
+    background: var(--color);
+    box-sizing: border-box;
+    padding-left: 50px;
+    padding-right: 50px;
+    padding-top: 30px;
+    padding-bottom: 25px;
+    border-radius: 15px;
+}
+
+.industryTitle{
+    font-size: 44px;
+    font-weight: 500;
+    color: white;
+    font-family: sans-serif;
 }
 
 .full-body-container{
@@ -248,8 +291,9 @@ h4{
     padding: 20px;
     border-radius: 20px;
     width: 100%;
+    box-sizing: border-box;
     margin-left: -20px;
-    border-left: solid 20px var(--linkedInBlue);
+    border-left: solid 20px #dcdcdc;
 }
 
 .payRange .slider{
