@@ -38,6 +38,22 @@ transition:all 0.2s ease}
     border-radius: 15px;
 }
 
+@keyframes spin {
+    0%{
+        transform:rotate(0deg)
+    }
+    100%{
+        transform:rotate(359deg)
+    }
+}
+
+.searchBtn svg{
+    height: 20px;
+    fill: white;
+    width: 20px;
+    animation:spin 1s infinite
+}
+
 .industryPathTitle{
     font-size: 16px;
     font-weight: 100;

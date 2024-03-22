@@ -161,6 +161,7 @@
         function searchJobs(){
             console.log("SEARCHING JOBS")
             document.getElementById("answer-box").innerHTML = ""
+            document.getElementById('searchButton').innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="loadingSpinner"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M304 48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zm0 416a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM48 304a48 48 0 1 0 0-96 48 48 0 1 0 0 96zm464-48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM142.9 437A48 48 0 1 0 75 369.1 48 48 0 1 0 142.9 437zm0-294.2A48 48 0 1 0 75 75a48 48 0 1 0 67.9 67.9zM369.1 437A48 48 0 1 0 437 369.1 48 48 0 1 0 369.1 437z"/></svg>`
             fetch("/episodes?" + new URLSearchParams({ title: formFieldValues.personalSkills }).toString())
             .then((response) => response.json())
             .then((data) => {
@@ -177,16 +178,16 @@
                 if(uniqueIndustries.has(row.industry)){
 
                 } else{
-                    console.log("GEN CONTAINER DIV", row)
 
                     let col = `var(--col_${Math.floor(Math.random() * 4) + 1})`;
                     while (col==prevColor){
-                        console.log("EQUALS PREV COLOR")
                         col = `var(--col_${Math.floor(Math.random() * 4) + 1})`;
                     }
                     prevColor=col;
                     industryColors.push({industry: row.industry, industryNum: industryColors.length+1, color:col})
                     uniqueIndustries.add(row.industry)
+
+                    //Generating the resp industry container div
                     let containerDiv = document.createElement("div")
                     containerDiv.classList.add('fadeIn')
                     containerDiv.classList.add('industryRsltContainer')
@@ -195,6 +196,7 @@
                     containerDiv.style='--color:'+col
                     document.getElementById("answer-box").appendChild(containerDiv)
 
+                    //Generating the industry title section
                     let industryTitleContainer = document.createElement("div")
                     industryTitleContainer.classList.add('industryTitle')
                     industryTitleContainer.innerHTML='<div class="industryPathTitle">Matched Industry Path: </div>'+row.industry
@@ -214,6 +216,7 @@
 
                 }
                 document.getElementById("answer-box").scrollIntoView({behavior:"smooth"})
+                document.getElementById('searchButton').innerHTML='Search'
             }
             );
 
@@ -234,6 +237,19 @@
             document.getElementById(inputToFocus).focus();
         }
 
+        /**
+         * Adds functionality of when the user hits enter that it's same as pressing the search btn
+         */
+        function enterSearchHandler(){
+            document.addEventListener('keyup', (event)=> {
+                if (event.key === 'Enter' || event.keyCode === 13) {
+                    // Enter key was pressed
+                    checkAndSearch();
+                    // Call your function or perform an action here
+                }
+            });
+        }
+
         // Add click event listener to the search button
         document.getElementById("searchButton").addEventListener("click", checkAndSearch);
 
@@ -246,6 +262,10 @@
         document.getElementById("personalSkills_inputBox").addEventListener("click", function() {
             focusInput('personalSkills');
         });
+
+        enterSearchHandler();
+        
+        
 
         
             
