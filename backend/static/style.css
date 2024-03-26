@@ -51,7 +51,7 @@ transition:all 0.2s ease}
     height: 20px;
     fill: white;
     width: 20px;
-    animation:spin 1s infinite
+    animation:spin 1s infinite linear
 }
 
 .industryPathTitle{
@@ -64,8 +64,11 @@ transition:all 0.2s ease}
     font-weight: 100;
     border-bottom: solid 0.5px #ffffff78;
     color: white;
+    display: flex;
     margin-bottom: 10px;
     font-family: sans-serif;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .full-body-container{
@@ -226,7 +229,7 @@ h4{
 }
 
 .main_display_container{
-    display: flex;
+    /* display: flex;
     flex-direction: column;
     width: 90%;
     overflow: hidden;
@@ -235,12 +238,26 @@ h4{
     position: relative;
     height:calc(100vh - (var(--topMargin) * 2));
     min-height:calc(100vh - (var(--topMargin) * 2));
+
+    border-radius: 30px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+    background: white;
+    align-items: center; */
+
+    display: flex;
+    flex-direction: column;
+    width: 90%;
+    overflow: hidden;
+    --topMargin: 60px;
+    margin-top: var(--topMargin);
+    position: relative;
+    height: calc(60vh - (var(--topMargin) * 2));
+    min-height: calc(60vh - (var(--topMargin) * 2));
     /* padding: 20px; */
     border-radius: 30px;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
     background: white;
     align-items: center;
-    /* border: solid 2px var(--linkedInBlue);*/
 }
 
 .searchBtn{
@@ -260,7 +277,11 @@ h4{
       font-weight: 500;
       transition: all 0.5s ease;
       margin-bottom: 20px;
-}
+
+      /* Revert */
+      margin-top: 60px;
+
+    }
 
 .formAndSearchContainer{
     width: 100%;
@@ -282,6 +303,10 @@ h4{
     width:100%;
     display:flex;
     gap:20px;
+    
+
+    /* Revert */
+    display:none;
 }
 
 .examplesContainer .example{

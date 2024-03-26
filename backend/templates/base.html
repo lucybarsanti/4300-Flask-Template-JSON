@@ -10,7 +10,7 @@
             <div class="pathFinderTitle">
                 <img src="{{ url_for('static', filename='images/PathFinderLogo.png') }}" />
                 <div class="subtitleText">
-                    Helping professionals find their path was a purpose
+                    Helping professionals find their path with a purpose
                 </div>
             </div>
         <div class="formAndSearchContainer">
@@ -147,7 +147,7 @@
             return `<div class='answer_resp'>
                 <h3 class='episode-title'>${title}</h3>
                 <p class='episode-desc'>${titleDesc}</p>
-                <p class='episode-rating'>IMDB Rating: ${rating}</p>
+                <p class='episode-rating'>Reviews: ${rating}</p>
             </div>`
         }
 
@@ -158,74 +158,113 @@
          */
         industryConfig=[]
 
-        function searchJobs(){
-            console.log("SEARCHING JOBS")
-            document.getElementById("answer-box").innerHTML = ""
-            document.getElementById('searchButton').innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="loadingSpinner"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M304 48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zm0 416a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM48 304a48 48 0 1 0 0-96 48 48 0 1 0 0 96zm464-48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM142.9 437A48 48 0 1 0 75 369.1 48 48 0 1 0 142.9 437zm0-294.2A48 48 0 1 0 75 75a48 48 0 1 0 67.9 67.9zM369.1 437A48 48 0 1 0 437 369.1 48 48 0 1 0 369.1 437z"/></svg>`
-            fetch("/episodes?" + new URLSearchParams({ title: formFieldValues.personalSkills }).toString())
-            .then((response) => response.json())
-            .then((data) => {
-                console.log(data);
-                const uniqueIndustries = new Set();
-                industryColors=[]
-                let prevColor = ''
-                data.forEach(row => {
-                
-                let tempDiv = document.createElement("div")
-                tempDiv.classList.add('fadeIn')
-                tempDiv.classList.add('indvRsltContainer')
-                
-                if(uniqueIndustries.has(row.industry)){
-
-                } else{
-
-                    let col = `var(--col_${Math.floor(Math.random() * 4) + 1})`;
-                    while (col==prevColor){
-                        col = `var(--col_${Math.floor(Math.random() * 4) + 1})`;
-                    }
-                    prevColor=col;
-                    industryColors.push({industry: row.industry, industryNum: industryColors.length+1, color:col})
-                    uniqueIndustries.add(row.industry)
-
-                    //Generating the resp industry container div
-                    let containerDiv = document.createElement("div")
-                    containerDiv.classList.add('fadeIn')
-                    containerDiv.classList.add('industryRsltContainer')
-                    containerDiv.id=row.industry
-                    
-                    containerDiv.style='--color:'+col
-                    document.getElementById("answer-box").appendChild(containerDiv)
-
-                    //Generating the industry title section
-                    let industryTitleContainer = document.createElement("div")
-                    industryTitleContainer.classList.add('industryTitle')
-                    industryTitleContainer.innerHTML='<div class="industryPathTitle">Matched Industry Path: </div>'+row.industry
-                    document.getElementById(row.industry).appendChild(industryTitleContainer)
-                    
-
-                }
-                
-                
-                tempDiv.innerHTML = answerBoxTemplate(row.title,row.industry,row.descr,row.imdb_rating)
-                document.getElementById(row.industry).appendChild(tempDiv)
-            })
-                if(!data || data.length==0){
-                    let tempDiv = document.createElement("div")
-                    tempDiv.innerHTML = 'No Results Found'
-                    document.getElementById("answer-box").appendChild(tempDiv)
-
-                }
-                document.getElementById("answer-box").scrollIntoView({behavior:"smooth"})
-                document.getElementById('searchButton').innerHTML='Search'
+        
+        // Fisher-Yates (Knuth) Shuffle Algorithm
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
             }
-            );
+            return array;
+        }
 
+        function searchPaths(){
+            try{
+                document.getElementById("answer-box").innerHTML = ""
+                document.getElementById('searchButton').innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="loadingSpinner"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M304 48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zm0 416a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM48 304a48 48 0 1 0 0-96 48 48 0 1 0 0 96zm464-48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM142.9 437A48 48 0 1 0 75 369.1 48 48 0 1 0 142.9 437zm0-294.2A48 48 0 1 0 75 75a48 48 0 1 0 67.9 67.9zM369.1 437A48 48 0 1 0 437 369.1 48 48 0 1 0 369.1 437z"/></svg>`
+                fetch("/searchPaths?" + new URLSearchParams({ personalSkills: formFieldValues.personalSkills, personalValues: formFieldValues.personalValues }).toString())
+                .catch((err)=>{
+                        throw new Error('Error fetching query results')
+                })
+                .then((response) => response.json())
+                .then((data) => {
+                    // console.log(data);
+                    //Data: 
+                    // # Total Output to send back to front end
+                    // #  industry_list, company_list, descrips
+                    //     return [industry_list, descrips]
+
+                    const uniqueIndustries = new Set();
+                    industryColors=[1, 2, 3, 4]
+                    let prevColor = ''
+                    let industryColorsShuffled = shuffleArray(industryColors)
+                    let industry_list = data[0]
+                    let descrips = data[1]
+                    for (let industry of industry_list){
+                    
+                        
+                        
+                        
+
+                        let col = `var(--col_${industryColorsShuffled[industry_list.indexOf(industry) % 4]})`;
+                        
+                        prevColor=col;
+                        industryColors.push({industry: industry, industryNum: industryColors.length+1, color:col})
+                        uniqueIndustries.add(industry)
+
+                        //Generating the resp industry container div
+                        let containerDiv = document.createElement("div")
+                        containerDiv.classList.add('fadeIn')
+                        containerDiv.classList.add('industryRsltContainer')
+                        containerDiv.id=industry
+                        
+                        containerDiv.style='--color:'+col
+                        document.getElementById("answer-box").appendChild(containerDiv)
+
+                        //Generating the industry title section
+                        let industryTitleContainer = document.createElement("div")
+                        industryTitleContainer.classList.add('industryTitle')
+                        industryTitleContainer.innerHTML='<div class="industryPathTitle">Matched Industry Path: </div>'+industry
+                        document.getElementById(industry).appendChild(industryTitleContainer)
+                        
+
+                        for(let companyName in descrips){
+                            let companyDescripSet = descrips[companyName];
+                            let company_industry = companyDescripSet[0];
+                            // console.log("HERE IS COMPANY NAME", companyName, company_industry, industry)
+
+                            if(company_industry==industry){
+                                let tempDiv = document.createElement("div")
+                                tempDiv.classList.add('fadeIn')
+                                tempDiv.classList.add('indvRsltContainer')
+                                // console.log("MATCH!", companyName)
+                                let company_description = companyDescripSet[1]
+                                let company_review =  companyDescripSet[2]
+                                tempDiv.innerHTML = answerBoxTemplate(companyName,company_industry,company_description, company_review? companyReview : 'No Reviews :(')
+                                document.getElementById(company_industry).appendChild(tempDiv)
+                            }
+                        }
+                        
+                    
+                    
+                    
+                
+    
+                    if(!data || data.length==0){
+                        let tempDiv = document.createElement("div")
+                        tempDiv.innerHTML = 'No Results Found'
+                        document.getElementById("answer-box").appendChild(tempDiv)
+
+                    }
+                    document.getElementById("answer-box").scrollIntoView({behavior:"smooth"})
+                    document.getElementById('searchButton').innerHTML='Search'
+                    }}
+            );
+               
+            } catch(e){
+                console.error("ERROR TRYING TO FIND RESPONSE");
+                document.getElementById('searchButton').innerHTML='Search'
+                let tempDiv = document.createElement("div")
+                tempDiv.innerHTML = 'No Results Found'
+                document.getElementById("answer-box").appendChild(tempDiv)
+            }
+            
         }
 
           // Function to check fields and filter text
           function checkAndSearch() {
             if (checkAndPopulateFields()) {
-                searchJobs();
+                searchPaths();
             } else {
                 // Handle case where fields are not filled
                 console.log("Please fill out all fields before searching.");
@@ -233,7 +272,7 @@
         }
 
         function focusInput(inputToFocus){
-            console.log("FOCUSED")
+            // console.log("FOCUSED")
             document.getElementById(inputToFocus).focus();
         }
 
