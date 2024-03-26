@@ -268,7 +268,7 @@ h4 {
     --topMargin: 60px;
     margin-top: var(--topMargin);
     position: relative;
-    --height: 75vw;
+    --height: 75vh;
     height: calc(var(--height) - (var(--topMargin) * 2));
     min-height: calc(var(--height) - (var(--topMargin) * 2));
     /* padding: 20px; */
