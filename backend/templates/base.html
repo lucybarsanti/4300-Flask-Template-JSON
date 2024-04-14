@@ -182,7 +182,7 @@
                     //Data: 
                     // # Total Output to send back to front end
                     // #  industry_list, company_list, descrips
-                    //     return [industry_list, descrips]
+                    //     return [industry_list, descrips, industry reviews]
 
                     const uniqueIndustries = new Set();
                     industryColors=[1, 2, 3, 4]
@@ -190,12 +190,9 @@
                     let industryColorsShuffled = shuffleArray(industryColors)
                     let industry_list = data[0]
                     let descrips = data[1]
+                    let industry_reviews = data[2]
                     for (let industry of industry_list){
                     
-                        
-                        
-                        
-
                         let col = `var(--col_${industryColorsShuffled[industry_list.indexOf(industry) % 4]})`;
                         
                         prevColor=col;
@@ -217,7 +214,6 @@
                         industryTitleContainer.innerHTML='<div class="industryPathTitle">Matched Industry Path: </div>'+industry
                         document.getElementById(industry).appendChild(industryTitleContainer)
                         
-
                         for(let companyName in descrips){
                             let companyDescripSet = descrips[companyName];
                             let company_industry = companyDescripSet[0];
@@ -234,21 +230,47 @@
                                 document.getElementById(company_industry).appendChild(tempDiv)
                             }
                         }
-                        
+
+                        // display 3 reviews per industry
+                        let industryReviewsDiv = document.createElement("div");
+                        industryReviewsDiv.classList.add('reviews');
+                        industryReviewsDiv.innerHTML = `<h3>Industry Reviews</h3>`;
+
+                        let reviews = industry_reviews[industry];
+                        if (reviews && reviews.length > 0) {
+                            reviews.forEach(review => {
+                                let reviewDiv = document.createElement("div");
+                                reviewDiv.classList.add('review');
+                                let companyName = review[0];
+                                let reviewHeadlines = review[1].split(/, (?=[A-Z])/);
+
+                                let reviewHtml = `<p><strong>${companyName}:</strong></p>`;
+                                
+                                reviewHeadlines.forEach(headline => {
+                                    reviewHtml += `<p>${headline}</p>`;
+                                });
+
+                                reviewDiv.innerHTML = reviewHtml;
+
+                                industryReviewsDiv.appendChild(reviewDiv);
+                            });
+                        } else {
+                            let noReviewsDiv = document.createElement("div");
+                            noReviewsDiv.classList.add('no-reviews');
+                            noReviewsDiv.innerHTML = `<p>No reviews available for this industry.</p>`;
+                            industryReviewsDiv.appendChild(noReviewsDiv);
+                        }
+                        containerDiv.appendChild(industryReviewsDiv);
                     
-                    
-                    
-                
-    
                     if(!data || data.length==0){
                         let tempDiv = document.createElement("div")
                         tempDiv.innerHTML = 'No Results Found'
                         document.getElementById("answer-box").appendChild(tempDiv)
-
                     }
                     document.getElementById("answer-box").scrollIntoView({behavior:"smooth"})
                     document.getElementById('searchButton').innerHTML='Search'
-                    }}
+                    }
+                }
             );
                
             } catch(e){

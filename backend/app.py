@@ -72,7 +72,7 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
         return df
 
     # set the fields you'd like to tokenize
-    fields = ['title', 'job_description', 'company_description', 'skills', 'job_industry']
+    fields = ['job_description', 'company_description', 'job_industry']
 
     # create df with token fields for each element in fields list
     tokenized_df = tokenize_df_fields(merged_df, fields, tokenize)
@@ -329,7 +329,6 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
 
     company_doc_norms = compute_doc_norms(new_company_df, company_description_inverted_index, company_idf, len(tokenized_df))
 
-
     company_results = index_search(new_company_df, personalValues_query, company_description_inverted_index, company_idf, company_doc_norms, accumulate_dot_scores, TreebankWordTokenizer())
 
 
@@ -339,7 +338,7 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
     count = 0
     index = 0
 
-    while count < 3:
+    while count < min(len(company_results), 3):
         id = company_results[index][1]
         if tokenized_df.loc[tokenized_df['job_id'] == id, 'company_name'].values[0] not in company_set:
             company_list.append(tokenized_df.loc[tokenized_df['job_id'] == id, 'company_name'].values[0])
@@ -352,14 +351,40 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
     #  TODO: Add review as a 3rd part of this dict
     descrips = {company: (tokenized_df.loc[tokenized_df['company_name'] == company, 'company_industry'].values[0], tokenized_df.loc[tokenized_df['company_name'] == company, 'company_description'].values[0], tokenized_df.loc[tokenized_df['company_name'] == company, 'headline'].values[0]) for company in company_list}
     
+    def get_random_reviews(reviews_df: pd.DataFrame, industry: str, num_reviews: int = 3) -> pd.DataFrame:
+
+        # filter reviews by industry
+        filtered_reviews = reviews_df.loc[
+        (reviews_df['company_industry'] == industry) & 
+        (reviews_df['headline'].notna())
+        ][['company_name', 'headline']].drop_duplicates(subset=['headline'], keep='first')
+
+        # if no reviews for industry, return empty df
+        if filtered_reviews.empty:
+            return []
+        
+        if len(filtered_reviews) <= num_reviews:
+            return filtered_reviews.apply(lambda x: [x['company_name'], x['headline']], axis=1).tolist()
+        
+        # randomly select reviews and return
+        random_reviews = filtered_reviews.sample(n=num_reviews)
+        return random_reviews.apply(lambda x: [x['company_name'], x['headline']], axis=1).tolist()
+    
+    # get 3 reviews for each industry, returns dict with list of 3 review headlines
+    industry_reviews = {}
+    for industry in top3_industries:
+        reviews = get_random_reviews(tokenized_df, industry)
+        industry_reviews[industry] = reviews
+    
+
 # for company in company_list:
 #   company_description = tokenized_df.loc[tokenized_df['company_name'] == company, 'company_description'].values
 #   descrips.append(company_description[0]) #I AM NOT SURE WHICH INDEX OF THIS LIST WE WANT TO PRINT-- I CANT PRINT RN SO CAN'T SEE WHAT THIS GIVES US
 
 
 # Total Output to send back to front end
-#  industry_list, company_list, descrips
-    return [top3_industries, descrips]
+#  industry_list, descrips, industry_reviews
+    return [top3_industries, descrips, industry_reviews]
 
 # Sample search using json with pandas
 def json_search(personalValues, personalSkills):
