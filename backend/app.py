@@ -49,6 +49,8 @@ app = Flask(__name__)
 CORS(app)
 def executeQuerySearch(personalValues_query, personalExperience_query):
     try:
+        k = 50
+
         def tokenize(text: str) -> List[str]:
             """
             Parameters
@@ -243,8 +245,8 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
             return ans
         
 
-        # Returns top 3 matches for query
-        def testing_SVD(query):
+        # Returns top n matches for query
+        def SVD_search_jobs(query, n = 3):
             # Tokenize query
             job_descriptions = merged_df['job_description'].astype(str).tolist()
 
@@ -253,7 +255,7 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
             query_vector = X[0].toarray()
 
             # Perform SVD
-            svd = TruncatedSVD(n_components=2)  # Reduce to 2 dimensions for example
+            svd = TruncatedSVD(n_components=k)  # Reduce to 2 dimensions for example
             svd.fit(X)
             U = svd.transform(X)
             Vt = svd.components_
@@ -264,7 +266,7 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
             # Calculate cosine similarity with each job description
             similarities = cosine_similarity(query_transformed, U[1:])
 
-            top_matches_idx = np.argsort(similarities[0])[::-1][:3]
+            top_matches_idx = np.argsort(similarities[0])[::-1][:n]
 
             # Get top 3 most similar job descriptions and their similarity scores
             top_matches = [(job_descriptions[idx], similarities[0][idx]) for idx in top_matches_idx]
@@ -274,7 +276,7 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
             top_matches_df = merged_df.iloc[indices_with_relation_to_merged_df]
             # Create an empty dictionary to store formatted results
             descrips_top_matches = []
-
+            indx = 0
             # Iterate through each row in top_matches_df
             for index, row in top_matches_df.iterrows():
                 company = row['company_name']
@@ -284,9 +286,14 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
                 industry = merged_df.loc[merged_df['company_name'] == company, 'company_industry'].values[0]
                 description = merged_df.loc[merged_df['company_name'] == company, 'company_description'].values[0]
                 headline = merged_df.loc[merged_df['company_name'] == company, 'headline'].values[0]
+                # Retrieve the similarity score for this particular match
+                print("HERE ARE TOP MATCHES LENGTH", len(top_matches),index)
+                simScore = top_matches[indx][1]
                 
                 # Store the formatted information as a tuple and append to the list
-                descrips_top_matches.append((company, industry, description, headline))
+                descrips_top_matches.append((company, industry, description, headline, simScore))
+                indx+=1
+
 
 
 
@@ -345,7 +352,7 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
 
             # q_p = np.dot(query_tokens.T, terms_compressed_svd)
             # svd(merged_df, query_tokens)
-            svdOutputs = testing_SVD(query)
+            svdOutputs = SVD_search_jobs(query)
 
 
 

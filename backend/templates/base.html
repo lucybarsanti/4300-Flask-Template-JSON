@@ -178,7 +178,10 @@
                 svd_containerDiv.style = '--color:#0a66c2'
 
                 document.getElementById("answer-box").appendChild(svd_containerDiv)
-
+                let SVD_results_title = document.createElement("div")
+                SVD_results_title.classList.add('SVD_results_title')
+                SVD_results_title.innerHTML = 'SVD Company Results'
+                svd_containerDiv.appendChild(SVD_results_title)
 
                 for (let svdResult of svdDataList) {
                     // console.log("HERE IS SVD RESULT", svdDataList);
