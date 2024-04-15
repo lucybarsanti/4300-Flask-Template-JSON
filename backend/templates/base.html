@@ -202,9 +202,9 @@
 
 
                         for (let svdResult of svdDataList) {
-                            console.log("HERE IS SVD RESULT", svdDataList);
+                            // console.log("HERE IS SVD RESULT", svdDataList);
                             let svd_result_div = document.createElement("div")
-                            svd_result_div.innerHTML = `<div class="title"> ${svdResult[0]} </div> <div class="industry">${svdResult[1]}</div>  <div class="descr">${svdResult[2]}</div>`
+                            svd_result_div.innerHTML = `<div class="title"> ${svdResult[0]} </div> <div class="industry">Industry: ${svdResult[1]}</div>  <div class="descr">${svdResult[2]}</div>`
                             svd_containerDiv.appendChild(svd_result_div)
                             // industryTitleContainer.innerHTML = '<div class="industryPathTitle">SVD Matched Company</div>' + 
                             // document.getElementById(industry).appendChild(industryTitleContainer)
