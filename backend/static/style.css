@@ -25,7 +25,7 @@ body {
     transform: scale(1.025);
 }
 
-.indvRsltContainer:hover .reviews {
+.reviews:hover {
     transform: scale(1.025);
 }
 
@@ -287,14 +287,15 @@ h4 {
     padding: 25px;
     margin-left: -20px;
     border-radius: 10px;
-    background: #3b3b3b;
+    background: #ffffff;
     box-sizing: border-box;
-    color: white;
-    border-left: solid 20px #282828
+    transition: all 0.2s ease;
+    color: #303030;
+    border-left: solid 20px #282828;
 }
 
 .reviews.noReviews {
-    opacity: 0.8;
+    opacity: 0.8 !important;
 }
 
 .reviews .industry_reviews_header {
@@ -390,7 +391,17 @@ h4 {
     width: 100%;
     box-sizing: border-box;
     margin-left: -20px;
-    border-left: solid 20px #dcdcdc;
+    border-left: solid 20px #282828;
+}
+
+.svdResult {
+    padding: 25px;
+    margin-left: -20px;
+    border-radius: 10px;
+    background: #ffffff;
+    box-sizing: border-box;
+    color: #303030;
+    border-left: solid 20px #282828;
 }
 
 .payRange .slider {

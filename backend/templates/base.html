@@ -169,133 +169,158 @@
             return array;
         }
 
+        function setupResultsDisplay(data) {
+            const insertSVDResults = () => {
+                let svd_containerDiv = document.createElement("div")
+                svd_containerDiv.classList.add('fadeIn')
+                svd_containerDiv.classList.add('svdResultsContainer')
+                svd_containerDiv.classList.add('industryRsltContainer')
+                svd_containerDiv.style = '--color:#0a66c2'
+
+                document.getElementById("answer-box").appendChild(svd_containerDiv)
+
+
+                for (let svdResult of svdDataList) {
+                    // console.log("HERE IS SVD RESULT", svdDataList);
+                    let svd_result_div = document.createElement("div")
+                    svd_result_div.classList.add('svdResult')
+                    svd_result_div.innerHTML = `
+                                <div class="title"> ${svdResult[0]} </div>
+                                <div class="industry">Industry: ${svdResult[1]}</div>
+                                <div class="descr">${svdResult[2]}</div>`
+                    svd_containerDiv.appendChild(svd_result_div)
+                    // industryTitleContainer.innerHTML = '<div class="industryPathTitle">SVD Matched Company</div>' + 
+                    // document.getElementById(industry).appendChild(industryTitleContainer)
+
+
+                }
+            }
+            const uniqueIndustries = new Set();
+            industryColors = [1, 2, 3, 4]
+            let prevColor = ''
+            let industryColorsShuffled = shuffleArray(industryColors)
+            let industry_list = data[0]
+            let descrips = data[1]
+            let industry_reviews = data[2]
+            let svdDataList = data[3]
+
+            insertSVDResults();
+
+            for (let industry of industry_list) {
+
+                let col = `var(--col_${industryColorsShuffled[industry_list.indexOf(industry) % 4]})`;
+
+                prevColor = col;
+                industryColors.push({ industry: industry, industryNum: industryColors.length + 1, color: col })
+                uniqueIndustries.add(industry)
+
+                //Generating the resp industry container div
+                let containerDiv = document.createElement("div")
+                containerDiv.classList.add('fadeIn')
+                containerDiv.classList.add('industryRsltContainer')
+                containerDiv.id = industry
+
+                containerDiv.style = '--color:' + col
+                document.getElementById("answer-box").appendChild(containerDiv)
+
+                //Generating the industry title section
+                let industryTitleContainer = document.createElement("div")
+                industryTitleContainer.classList.add('industryTitle')
+                industryTitleContainer.innerHTML = '<div class="industryPathTitle">Matched Industry Path: </div>' + industry
+                document.getElementById(industry).appendChild(industryTitleContainer)
+
+                for (let companyName in descrips) {
+                    let companyDescripSet = descrips[companyName];
+                    let company_industry = companyDescripSet[0];
+                    // console.log("HERE IS COMPANY NAME", companyName, company_industry, industry)
+
+                    if (company_industry == industry) {
+                        let tempDiv = document.createElement("div")
+                        tempDiv.classList.add('fadeIn')
+                        tempDiv.classList.add('indvRsltContainer')
+                        // console.log("MATCH!", companyName)
+                        let company_description = companyDescripSet[1]
+                        let company_review = companyDescripSet[2]
+                        tempDiv.innerHTML = answerBoxTemplate(companyName, company_industry, company_description, company_review ? companyReview : 'No Reviews :(')
+                        document.getElementById(company_industry).appendChild(tempDiv)
+                    }
+                }
+
+                // display 3 reviews per industry
+                let industryReviewsDiv = document.createElement("div");
+                industryReviewsDiv.classList.add('reviews');
+                industryReviewsDiv.classList.add('fadeIn')
+
+                industryReviewsDiv.innerHTML = `<h3 class="industry_reviews_header">Industry Reviews</h3>`;
+
+                let reviews = industry_reviews[industry];
+                console.log(reviews);
+                if (reviews && reviews.length > 0) {
+                    reviews.forEach(review => {
+                        let reviewDiv = document.createElement("div");
+                        reviewDiv.classList.add('review');
+                        let companyName = review[0];
+                        let reviewHeadlines = review[1].split(/, (?=[A-Z])/);
+
+                        let reviewHtml = `<p class="companyTitle"><strong>${companyName}:</strong></p>`;
+
+                        reviewHeadlines.forEach(headline => {
+                            reviewHtml += `<li class="reviewLine">${headline}</li>`;
+                        });
+
+                        reviewDiv.innerHTML = reviewHtml;
+
+                        industryReviewsDiv.appendChild(reviewDiv);
+                    });
+                } else {
+                    let noReviewsDiv = document.createElement("div");
+                    industryReviewsDiv.classList.add('noReviews')
+                    noReviewsDiv.classList.add('no-reviews');
+                    noReviewsDiv.innerHTML = `<p>No reviews available for this industry.</p>`;
+                    industryReviewsDiv.appendChild(noReviewsDiv);
+                }
+                containerDiv.appendChild(industryReviewsDiv);
+
+                if (!data || data.length == 0) {
+                    let tempDiv = document.createElement("div")
+                    tempDiv.innerHTML = 'No Results Found'
+                    document.getElementById("answer-box").appendChild(tempDiv)
+                }
+                document.getElementById("answer-box").scrollIntoView({ behavior: "smooth" })
+                document.getElementById('searchButton').innerHTML = 'Search'
+            }
+
+        }
+
         function searchPaths() {
             try {
                 document.getElementById("answer-box").innerHTML = ""
                 document.getElementById('searchButton').innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="loadingSpinner"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M304 48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zm0 416a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM48 304a48 48 0 1 0 0-96 48 48 0 1 0 0 96zm464-48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM142.9 437A48 48 0 1 0 75 369.1 48 48 0 1 0 142.9 437zm0-294.2A48 48 0 1 0 75 75a48 48 0 1 0 67.9 67.9zM369.1 437A48 48 0 1 0 437 369.1 48 48 0 1 0 369.1 437z"/></svg>`
                 fetch("/searchPaths?" + new URLSearchParams({ personalSkills: formFieldValues.personalSkills, personalValues: formFieldValues.personalValues }).toString())
-                    .catch((err) => {
-                        throw new Error('Error fetching query results')
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
                     })
-                    .then((response) => response.json())
                     .then((data) => {
-                        // console.log(data);
-                        //Data: 
-                        // # Total Output to send back to front end
-                        // #  industry_list, company_list, descrips
-                        //     return [industry_list, descrips, industry reviews]
-
-                        const uniqueIndustries = new Set();
-                        industryColors = [1, 2, 3, 4]
-                        let prevColor = ''
-                        let industryColorsShuffled = shuffleArray(industryColors)
-                        let industry_list = data[0]
-                        let descrips = data[1]
-                        let industry_reviews = data[2]
-                        let svdDataList = data[3]
-                        let svd_containerDiv = document.createElement("div")
-                        svd_containerDiv.classList.add('fadeIn')
-                        svd_containerDiv.classList.add('industryRsltContainer')
-                        svd_containerDiv.classList.add('svd')
-
-                        document.getElementById("answer-box").appendChild(svd_containerDiv)
+                        console.log(data);
+                        // Proceed with processing the data
+                        setupResultsDisplay(data)
+                    })
+                    .catch((error) => {
+                        console.error('Error during fetch:', error);
+                        // Handle any network errors or server-side errors here
+                        // For example, you can display an error message to the user
+                        console.error("ERROR TRYING TO FIND RESPONSE", error);
+                        document.getElementById('searchButton').innerHTML = 'Search'
+                        let tempDiv = document.createElement("div")
+                        tempDiv.innerHTML = 'No Results Found'
+                        document.getElementById("answer-box").appendChild(tempDiv)
+                        throw new Error(data.error)
+                    });
 
 
-                        for (let svdResult of svdDataList) {
-                            // console.log("HERE IS SVD RESULT", svdDataList);
-                            let svd_result_div = document.createElement("div")
-                            svd_result_div.innerHTML = `<div class="title"> ${svdResult[0]} </div> <div class="industry">Industry: ${svdResult[1]}</div>  <div class="descr">${svdResult[2]}</div>`
-                            svd_containerDiv.appendChild(svd_result_div)
-                            // industryTitleContainer.innerHTML = '<div class="industryPathTitle">SVD Matched Company</div>' + 
-                            // document.getElementById(industry).appendChild(industryTitleContainer)
-
-
-                        }
-                        for (let industry of industry_list) {
-
-                            let col = `var(--col_${industryColorsShuffled[industry_list.indexOf(industry) % 4]})`;
-
-                            prevColor = col;
-                            industryColors.push({ industry: industry, industryNum: industryColors.length + 1, color: col })
-                            uniqueIndustries.add(industry)
-
-                            //Generating the resp industry container div
-                            let containerDiv = document.createElement("div")
-                            containerDiv.classList.add('fadeIn')
-                            containerDiv.classList.add('industryRsltContainer')
-                            containerDiv.id = industry
-
-                            containerDiv.style = '--color:' + col
-                            document.getElementById("answer-box").appendChild(containerDiv)
-
-                            //Generating the industry title section
-                            let industryTitleContainer = document.createElement("div")
-                            industryTitleContainer.classList.add('industryTitle')
-                            industryTitleContainer.innerHTML = '<div class="industryPathTitle">Matched Industry Path: </div>' + industry
-                            document.getElementById(industry).appendChild(industryTitleContainer)
-
-                            for (let companyName in descrips) {
-                                let companyDescripSet = descrips[companyName];
-                                let company_industry = companyDescripSet[0];
-                                // console.log("HERE IS COMPANY NAME", companyName, company_industry, industry)
-
-                                if (company_industry == industry) {
-                                    let tempDiv = document.createElement("div")
-                                    tempDiv.classList.add('fadeIn')
-                                    tempDiv.classList.add('indvRsltContainer')
-                                    // console.log("MATCH!", companyName)
-                                    let company_description = companyDescripSet[1]
-                                    let company_review = companyDescripSet[2]
-                                    tempDiv.innerHTML = answerBoxTemplate(companyName, company_industry, company_description, company_review ? companyReview : 'No Reviews :(')
-                                    document.getElementById(company_industry).appendChild(tempDiv)
-                                }
-                            }
-
-                            // display 3 reviews per industry
-                            let industryReviewsDiv = document.createElement("div");
-                            industryReviewsDiv.classList.add('reviews');
-                            industryReviewsDiv.classList.add('fadeIn')
-
-                            industryReviewsDiv.innerHTML = `<h3 class="industry_reviews_header">Industry Reviews</h3>`;
-
-                            let reviews = industry_reviews[industry];
-                            console.log(reviews);
-                            if (reviews && reviews.length > 0) {
-                                reviews.forEach(review => {
-                                    let reviewDiv = document.createElement("div");
-                                    reviewDiv.classList.add('review');
-                                    let companyName = review[0];
-                                    let reviewHeadlines = review[1].split(/, (?=[A-Z])/);
-
-                                    let reviewHtml = `<p class="companyTitle"><strong>${companyName}:</strong></p>`;
-
-                                    reviewHeadlines.forEach(headline => {
-                                        reviewHtml += `<li class="reviewLine">${headline}</li>`;
-                                    });
-
-                                    reviewDiv.innerHTML = reviewHtml;
-
-                                    industryReviewsDiv.appendChild(reviewDiv);
-                                });
-                            } else {
-                                let noReviewsDiv = document.createElement("div");
-                                industryReviewsDiv.classList.add('noReviews')
-                                noReviewsDiv.classList.add('no-reviews');
-                                noReviewsDiv.innerHTML = `<p>No reviews available for this industry.</p>`;
-                                industryReviewsDiv.appendChild(noReviewsDiv);
-                            }
-                            containerDiv.appendChild(industryReviewsDiv);
-
-                            if (!data || data.length == 0) {
-                                let tempDiv = document.createElement("div")
-                                tempDiv.innerHTML = 'No Results Found'
-                                document.getElementById("answer-box").appendChild(tempDiv)
-                            }
-                            document.getElementById("answer-box").scrollIntoView({ behavior: "smooth" })
-                            document.getElementById('searchButton').innerHTML = 'Search'
-                        }
-                    }
-                    );
 
             } catch (e) {
                 console.error("ERROR TRYING TO FIND RESPONSE");
