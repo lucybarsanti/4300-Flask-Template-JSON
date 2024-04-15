@@ -193,20 +193,22 @@
                         let descrips = data[1]
                         let industry_reviews = data[2]
                         let svdDataList = data[3]
+                        let svd_containerDiv = document.createElement("div")
+                        svd_containerDiv.classList.add('fadeIn')
+                        svd_containerDiv.classList.add('industryRsltContainer')
+                        svd_containerDiv.classList.add('svd')
+
+                        document.getElementById("answer-box").appendChild(svd_containerDiv)
+
+
                         for (let svdResult of svdDataList) {
                             console.log("HERE IS SVD RESULT", svdDataList);
-                            let containerDiv = document.createElement("div")
-                            containerDiv.classList.add('fadeIn')
-                            containerDiv.classList.add('industryRsltContainer')
-                            containerDiv.classList.add('svd')
-
-                            document.getElementById("answer-box").appendChild(containerDiv)
-
-                            //Generating the industry title section
-                            let industryTitleContainer = document.createElement("div")
-                            industryTitleContainer.classList.add('industryTitle')
+                            let svd_result_div = document.createElement("div")
+                            svd_result_div.innerHTML = `<div class="title"> ${svdResult[0]} </div> <div class="industry">${svdResult[1]}</div>  <div class="descr">${svdResult[2]}</div>`
+                            svd_containerDiv.appendChild(svd_result_div)
                             // industryTitleContainer.innerHTML = '<div class="industryPathTitle">SVD Matched Company</div>' + 
                             // document.getElementById(industry).appendChild(industryTitleContainer)
+
 
                         }
                         for (let industry of industry_list) {

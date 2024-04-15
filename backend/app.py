@@ -291,7 +291,7 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
 
 
 
-        print(descrips_top_matches)
+        # print(descrips_top_matches)
         return descrips_top_matches
 
     
