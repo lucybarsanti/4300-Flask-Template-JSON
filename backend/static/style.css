@@ -25,6 +25,11 @@ body {
     transform: scale(1.025);
 }
 
+.indvRsltContainer:hover .reviews {
+    transform: scale(1.025);
+}
+
+
 .industryRsltContainer {
     display: flex;
     flex-direction: column;
@@ -278,6 +283,32 @@ h4 {
     align-items: center;
 }
 
+.reviews {
+    padding: 25px;
+    margin-left: -20px;
+    border-radius: 10px;
+    background: #3b3b3b;
+    box-sizing: border-box;
+    color: white;
+    border-left: solid 20px #282828
+}
+
+.reviews.noReviews {
+    opacity: 0.8;
+}
+
+.reviews .industry_reviews_header {
+    border-bottom: 1px solid gray;
+    padding-bottom: 8px;
+}
+
+.reviews .companyTitle {}
+
+.reviews .reviewLine {
+    margin-left: 10px;
+    font-size: 12px;
+}
+
 .searchBtn {
     /* position: absolute; */
     width: 45%;
@@ -321,7 +352,6 @@ h4 {
     width: 100%;
     display: flex;
     gap: 20px;
-
 
     /* Revert */
     display: none;

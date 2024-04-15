@@ -3,7 +3,9 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap"
+    rel="stylesheet">
+
 <body>
     <div class="full-body-container">
         <div class="main_display_container">
@@ -13,31 +15,31 @@
                     Helping professionals find their path with a purpose
                 </div>
             </div>
-        <div class="formAndSearchContainer">
-            <form class="input_form_container">
-                <div class="input_form">
-                    <div class="lhs form_column">
-                        <!-- <div class="input-box jobTitle fadeIn" >
+            <div class="formAndSearchContainer">
+                <form class="input_form_container">
+                    <div class="input_form">
+                        <div class="lhs form_column">
+                            <!-- <div class="input-box jobTitle fadeIn" >
                             <img src="{{ url_for('static', filename='images/mag.png') }}" />
                             <input placeholder="Enter Job Title" id="jobTitle" >
                         </div> -->
-                        <div class="input-box jobDescription description fadeIn" id="personalValues_inputBox">
-                            <img src="{{ url_for('static', filename='images/mag.png') }}" />
-                            <input placeholder="Enter Career/Personal Values" id="personalValues"  >
+                            <div class="input-box jobDescription description fadeIn" id="personalValues_inputBox">
+                                <img src="{{ url_for('static', filename='images/mag.png') }}" />
+                                <input placeholder="Enter Career/Personal Values" id="personalValues">
+                            </div>
+
+
                         </div>
-                        
-                       
-                    </div>
-                    <div class="rhs form_column">
-                     
-                        <div class="input-box companyDescription description fadeIn" id="personalSkills_inputBox">
-                            <img src="{{ url_for('static', filename='images/mag.png') }}" />
-                            <input placeholder="Enter Personal Skills/Experience" id="personalSkills" >
-                        </div>
-                        
-                        
-    
-                        <!-- <div class="citySelectContainer fadeIn">
+                        <div class="rhs form_column">
+
+                            <div class="input-box companyDescription description fadeIn" id="personalSkills_inputBox">
+                                <img src="{{ url_for('static', filename='images/mag.png') }}" />
+                                <input placeholder="Enter Personal Skills/Experience" id="personalSkills">
+                            </div>
+
+
+
+                            <!-- <div class="citySelectContainer fadeIn">
                             <div>
                                 <h4>Please Choose a City</h4>
                             </div>
@@ -56,19 +58,19 @@
                                 </select>
                             </fieldset>
                         </div> -->
-    <!-- 
+                            <!-- 
                         <div class="input-box experienceAndSkills description fadeIn" >
                             <input placeholder="Experience and Skills" id="userExperienceAndSkills" >
                         </div> -->
-                         
-                        
+
+
+                        </div>
                     </div>
-                </div>
-           
-                        
-                        
-                        <!-- <div id="map"></div> -->
-                <!-- <div class="salaryRangeContainer fadeIn">
+
+
+
+                    <!-- <div id="map"></div> -->
+                    <!-- <div class="salaryRangeContainer fadeIn">
                             <h4>What is your ideal salary?</h4>
                             <div class="input-box payRange ">
                                 <input class="slider" value="250000" id="salaryRange" oninput="this.nextElementSibling.value = `${'$'+this.value}`" min="10000" max="1000000" type="range" id="filter-text-val" >
@@ -76,89 +78,88 @@
     
                             </div>
                 </div> -->
-            
-            </form>
-        <div class="examplesContainer fadeIn">
-            <div class="example one fadeIn">
 
+                </form>
+                <div class="examplesContainer fadeIn">
+                    <div class="example one fadeIn">
+
+                    </div>
+                    <div class="example two fadeIn"></div>
+                    <div class="example three fadeIn"></div>
+                </div>
+
+                <button class="searchBtn fadeIn" id="searchButton">
+                    Search
+                </button>
             </div>
-            <div class="example two fadeIn"></div>
-            <div class="example three fadeIn"></div>
-        </div>
-  
-        <button class="searchBtn fadeIn" id="searchButton">
-            Search
-        </button>
-        </div>
-           
-     
-           
+
+
+
         </div>
         <div id="answer-box">
 
         </div>
     </div>
-    <script>    
-    formFieldValues = {}
-    
+    <script>
+        formFieldValues = {}
+
         // Function to check if all fields are filled. Also updates the form field values
-            function checkAndPopulateFields() {
-                let personalValues = document.getElementById("personalValues").value.trim();
-                let personalSkills = document.getElementById("personalSkills").value.trim();
+        function checkAndPopulateFields() {
+            let personalValues = document.getElementById("personalValues").value.trim();
+            let personalSkills = document.getElementById("personalSkills").value.trim();
 
-                
-                 // Populate formFieldValues object with field values
-                formFieldValues.personalValues = personalValues;
-                formFieldValues.personalSkills = personalSkills;
-                
-                // Check if any field is empty
-                if (personalValues === "" || personalSkills === "") {
-                    return false;
-                } else {
-                    return true;
-                }
+
+            // Populate formFieldValues object with field values
+            formFieldValues.personalValues = personalValues;
+            formFieldValues.personalSkills = personalSkills;
+
+            // Check if any field is empty
+            if (personalValues === "" || personalSkills === "") {
+                return false;
+            } else {
+                return true;
             }
+        }
 
-            // Function to update button color
-            function updateButtonColor() {
-                let searchButton = document.getElementById("searchButton");
+        // Function to update button color
+        function updateButtonColor() {
+            let searchButton = document.getElementById("searchButton");
 
-                if (checkAndPopulateFields()) {
-                    // All fields are filled, change button color
-                    searchButton.style.backgroundColor = "var(--linkedInBlue)";
-                } else {
-                    // At least one field is empty, reset button color
-                    searchButton.style.backgroundColor = "gray";
-                }
+            if (checkAndPopulateFields()) {
+                // All fields are filled, change button color
+                searchButton.style.backgroundColor = "var(--linkedInBlue)";
+            } else {
+                // At least one field is empty, reset button color
+                searchButton.style.backgroundColor = "gray";
             }
+        }
 
-            // Call updateButtonColor() on input change
-            document.addEventListener("input", updateButtonColor);
+        // Call updateButtonColor() on input change
+        document.addEventListener("input", updateButtonColor);
 
-            // Initial call to set button color on page load
-            updateButtonColor();
+        // Initial call to set button color on page load
+        updateButtonColor();
 
-            // // Function to update output value for salary range
-            // function updateOutputValue(value) {
-            //     document.getElementById("salaryOutput").textContent = "$" + value;
-            // }
-       
-        function answerBoxTemplate(title,industry,titleDesc,rating){
+        // // Function to update output value for salary range
+        // function updateOutputValue(value) {
+        //     document.getElementById("salaryOutput").textContent = "$" + value;
+        // }
+
+        function answerBoxTemplate(title, industry, titleDesc, rating) {
             return `<div class='answer_resp'>
                 <h3 class='episode-title'>${title}</h3>
                 <p class='episode-desc'>${titleDesc}</p>
-                <p class='episode-rating'>Reviews: ${rating}</p>
             </div>`
         }
 
-    
-        
+
+
         /**
          * industry: string, industryNum: number, color:string
          */
-        industryConfig=[]
+        industryConfig = []
 
-        
+
         // Fisher-Yates (Knuth) Shuffle Algorithm
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -168,123 +169,144 @@
             return array;
         }
 
-        function searchPaths(){
-            try{
+        function searchPaths() {
+            try {
                 document.getElementById("answer-box").innerHTML = ""
                 document.getElementById('searchButton').innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="loadingSpinner"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M304 48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zm0 416a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM48 304a48 48 0 1 0 0-96 48 48 0 1 0 0 96zm464-48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM142.9 437A48 48 0 1 0 75 369.1 48 48 0 1 0 142.9 437zm0-294.2A48 48 0 1 0 75 75a48 48 0 1 0 67.9 67.9zM369.1 437A48 48 0 1 0 437 369.1 48 48 0 1 0 369.1 437z"/></svg>`
                 fetch("/searchPaths?" + new URLSearchParams({ personalSkills: formFieldValues.personalSkills, personalValues: formFieldValues.personalValues }).toString())
-                .catch((err)=>{
+                    .catch((err) => {
                         throw new Error('Error fetching query results')
-                })
-                .then((response) => response.json())
-                .then((data) => {
-                    // console.log(data);
-                    //Data: 
-                    // # Total Output to send back to front end
-                    // #  industry_list, company_list, descrips
-                    //     return [industry_list, descrips, industry reviews]
+                    })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        // console.log(data);
+                        //Data: 
+                        // # Total Output to send back to front end
+                        // #  industry_list, company_list, descrips
+                        //     return [industry_list, descrips, industry reviews]
 
-                    const uniqueIndustries = new Set();
-                    industryColors=[1, 2, 3, 4]
-                    let prevColor = ''
-                    let industryColorsShuffled = shuffleArray(industryColors)
-                    let industry_list = data[0]
-                    let descrips = data[1]
-                    let industry_reviews = data[2]
-                    for (let industry of industry_list){
-                    
-                        let col = `var(--col_${industryColorsShuffled[industry_list.indexOf(industry) % 4]})`;
-                        
-                        prevColor=col;
-                        industryColors.push({industry: industry, industryNum: industryColors.length+1, color:col})
-                        uniqueIndustries.add(industry)
+                        const uniqueIndustries = new Set();
+                        industryColors = [1, 2, 3, 4]
+                        let prevColor = ''
+                        let industryColorsShuffled = shuffleArray(industryColors)
+                        let industry_list = data[0]
+                        let descrips = data[1]
+                        let industry_reviews = data[2]
+                        let svdDataList = data[3]
+                        for (let svdResult of svdDataList) {
+                            console.log("HERE IS SVD RESULT", svdDataList);
+                            let containerDiv = document.createElement("div")
+                            containerDiv.classList.add('fadeIn')
+                            containerDiv.classList.add('industryRsltContainer')
+                            containerDiv.classList.add('svd')
 
-                        //Generating the resp industry container div
-                        let containerDiv = document.createElement("div")
-                        containerDiv.classList.add('fadeIn')
-                        containerDiv.classList.add('industryRsltContainer')
-                        containerDiv.id=industry
-                        
-                        containerDiv.style='--color:'+col
-                        document.getElementById("answer-box").appendChild(containerDiv)
+                            document.getElementById("answer-box").appendChild(containerDiv)
 
-                        //Generating the industry title section
-                        let industryTitleContainer = document.createElement("div")
-                        industryTitleContainer.classList.add('industryTitle')
-                        industryTitleContainer.innerHTML='<div class="industryPathTitle">Matched Industry Path: </div>'+industry
-                        document.getElementById(industry).appendChild(industryTitleContainer)
-                        
-                        for(let companyName in descrips){
-                            let companyDescripSet = descrips[companyName];
-                            let company_industry = companyDescripSet[0];
-                            // console.log("HERE IS COMPANY NAME", companyName, company_industry, industry)
+                            //Generating the industry title section
+                            let industryTitleContainer = document.createElement("div")
+                            industryTitleContainer.classList.add('industryTitle')
+                            // industryTitleContainer.innerHTML = '<div class="industryPathTitle">SVD Matched Company</div>' + 
+                            // document.getElementById(industry).appendChild(industryTitleContainer)
 
-                            if(company_industry==industry){
-                                let tempDiv = document.createElement("div")
-                                tempDiv.classList.add('fadeIn')
-                                tempDiv.classList.add('indvRsltContainer')
-                                // console.log("MATCH!", companyName)
-                                let company_description = companyDescripSet[1]
-                                let company_review =  companyDescripSet[2]
-                                tempDiv.innerHTML = answerBoxTemplate(companyName,company_industry,company_description, company_review? companyReview : 'No Reviews :(')
-                                document.getElementById(company_industry).appendChild(tempDiv)
+                        }
+                        for (let industry of industry_list) {
+
+                            let col = `var(--col_${industryColorsShuffled[industry_list.indexOf(industry) % 4]})`;
+
+                            prevColor = col;
+                            industryColors.push({ industry: industry, industryNum: industryColors.length + 1, color: col })
+                            uniqueIndustries.add(industry)
+
+                            //Generating the resp industry container div
+                            let containerDiv = document.createElement("div")
+                            containerDiv.classList.add('fadeIn')
+                            containerDiv.classList.add('industryRsltContainer')
+                            containerDiv.id = industry
+
+                            containerDiv.style = '--color:' + col
+                            document.getElementById("answer-box").appendChild(containerDiv)
+
+                            //Generating the industry title section
+                            let industryTitleContainer = document.createElement("div")
+                            industryTitleContainer.classList.add('industryTitle')
+                            industryTitleContainer.innerHTML = '<div class="industryPathTitle">Matched Industry Path: </div>' + industry
+                            document.getElementById(industry).appendChild(industryTitleContainer)
+
+                            for (let companyName in descrips) {
+                                let companyDescripSet = descrips[companyName];
+                                let company_industry = companyDescripSet[0];
+                                // console.log("HERE IS COMPANY NAME", companyName, company_industry, industry)
+
+                                if (company_industry == industry) {
+                                    let tempDiv = document.createElement("div")
+                                    tempDiv.classList.add('fadeIn')
+                                    tempDiv.classList.add('indvRsltContainer')
+                                    // console.log("MATCH!", companyName)
+                                    let company_description = companyDescripSet[1]
+                                    let company_review = companyDescripSet[2]
+                                    tempDiv.innerHTML = answerBoxTemplate(companyName, company_industry, company_description, company_review ? companyReview : 'No Reviews :(')
+                                    document.getElementById(company_industry).appendChild(tempDiv)
+                                }
                             }
-                        }
 
-                        // display 3 reviews per industry
-                        let industryReviewsDiv = document.createElement("div");
-                        industryReviewsDiv.classList.add('reviews');
-                        industryReviewsDiv.innerHTML = `<h3>Industry Reviews</h3>`;
+                            // display 3 reviews per industry
+                            let industryReviewsDiv = document.createElement("div");
+                            industryReviewsDiv.classList.add('reviews');
+                            industryReviewsDiv.classList.add('fadeIn')
 
-                        let reviews = industry_reviews[industry];
-                        if (reviews && reviews.length > 0) {
-                            reviews.forEach(review => {
-                                let reviewDiv = document.createElement("div");
-                                reviewDiv.classList.add('review');
-                                let companyName = review[0];
-                                let reviewHeadlines = review[1].split(/, (?=[A-Z])/);
+                            industryReviewsDiv.innerHTML = `<h3 class="industry_reviews_header">Industry Reviews</h3>`;
 
-                                let reviewHtml = `<p><strong>${companyName}:</strong></p>`;
-                                
-                                reviewHeadlines.forEach(headline => {
-                                    reviewHtml += `<p>${headline}</p>`;
+                            let reviews = industry_reviews[industry];
+                            console.log(reviews);
+                            if (reviews && reviews.length > 0) {
+                                reviews.forEach(review => {
+                                    let reviewDiv = document.createElement("div");
+                                    reviewDiv.classList.add('review');
+                                    let companyName = review[0];
+                                    let reviewHeadlines = review[1].split(/, (?=[A-Z])/);
+
+                                    let reviewHtml = `<p class="companyTitle"><strong>${companyName}:</strong></p>`;
+
+                                    reviewHeadlines.forEach(headline => {
+                                        reviewHtml += `<li class="reviewLine">${headline}</li>`;
+                                    });
+
+                                    reviewDiv.innerHTML = reviewHtml;
+
+                                    industryReviewsDiv.appendChild(reviewDiv);
                                 });
+                            } else {
+                                let noReviewsDiv = document.createElement("div");
+                                industryReviewsDiv.classList.add('noReviews')
+                                noReviewsDiv.classList.add('no-reviews');
+                                noReviewsDiv.innerHTML = `<p>No reviews available for this industry.</p>`;
+                                industryReviewsDiv.appendChild(noReviewsDiv);
+                            }
+                            containerDiv.appendChild(industryReviewsDiv);
 
-                                reviewDiv.innerHTML = reviewHtml;
-
-                                industryReviewsDiv.appendChild(reviewDiv);
-                            });
-                        } else {
-                            let noReviewsDiv = document.createElement("div");
-                            noReviewsDiv.classList.add('no-reviews');
-                            noReviewsDiv.innerHTML = `<p>No reviews available for this industry.</p>`;
-                            industryReviewsDiv.appendChild(noReviewsDiv);
+                            if (!data || data.length == 0) {
+                                let tempDiv = document.createElement("div")
+                                tempDiv.innerHTML = 'No Results Found'
+                                document.getElementById("answer-box").appendChild(tempDiv)
+                            }
+                            document.getElementById("answer-box").scrollIntoView({ behavior: "smooth" })
+                            document.getElementById('searchButton').innerHTML = 'Search'
                         }
-                        containerDiv.appendChild(industryReviewsDiv);
-                    
-                    if(!data || data.length==0){
-                        let tempDiv = document.createElement("div")
-                        tempDiv.innerHTML = 'No Results Found'
-                        document.getElementById("answer-box").appendChild(tempDiv)
                     }
-                    document.getElementById("answer-box").scrollIntoView({behavior:"smooth"})
-                    document.getElementById('searchButton').innerHTML='Search'
-                    }
-                }
-            );
-               
-            } catch(e){
+                    );
+
+            } catch (e) {
                 console.error("ERROR TRYING TO FIND RESPONSE");
-                document.getElementById('searchButton').innerHTML='Search'
+                document.getElementById('searchButton').innerHTML = 'Search'
                 let tempDiv = document.createElement("div")
                 tempDiv.innerHTML = 'No Results Found'
                 document.getElementById("answer-box").appendChild(tempDiv)
             }
-            
+
         }
 
-          // Function to check fields and filter text
-          function checkAndSearch() {
+        // Function to check fields and filter text
+        function checkAndSearch() {
             if (checkAndPopulateFields()) {
                 searchPaths();
             } else {
@@ -293,7 +315,7 @@
             }
         }
 
-        function focusInput(inputToFocus){
+        function focusInput(inputToFocus) {
             // console.log("FOCUSED")
             document.getElementById(inputToFocus).focus();
         }
@@ -301,8 +323,8 @@
         /**
          * Adds functionality of when the user hits enter that it's same as pressing the search btn
          */
-        function enterSearchHandler(){
-            document.addEventListener('keyup', (event)=> {
+        function enterSearchHandler() {
+            document.addEventListener('keyup', (event) => {
                 if (event.key === 'Enter' || event.keyCode === 13) {
                     // Enter key was pressed
                     checkAndSearch();
@@ -315,20 +337,20 @@
         document.getElementById("searchButton").addEventListener("click", checkAndSearch);
 
 
-      // Use anonymous function to delay execution of focusInput
-        document.getElementById("personalValues_inputBox").addEventListener("click", function() {
+        // Use anonymous function to delay execution of focusInput
+        document.getElementById("personalValues_inputBox").addEventListener("click", function () {
             focusInput('personalValues');
         });
 
-        document.getElementById("personalSkills_inputBox").addEventListener("click", function() {
+        document.getElementById("personalSkills_inputBox").addEventListener("click", function () {
             focusInput('personalSkills');
         });
 
         enterSearchHandler();
-        
-        
 
-        
-            
+
+
+
+
     </script>
 </body>

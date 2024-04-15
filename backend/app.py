@@ -10,6 +10,14 @@ import re
 import math
 from collections.abc import Callable
 from nltk.tokenize import TreebankWordTokenizer
+from scipy.sparse.linalg import svds
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import normalize
+from sklearn.decomposition import TruncatedSVD
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+
 
 # ROOT_PATH for linking with all your files. 
 # Feel free to use a config.py or settings.py with a global export variable
@@ -24,6 +32,16 @@ json_file_path = os.path.join(current_directory, 'linkedin_glassdoor_job_id.json
 # Assuming your JSON data is stored in a file named 'init.json'
 # with open(json_file_path, 'r') as file:
 merged_df = pd.read_json('linkedin_glassdoor_job_id.json', orient ='split', compression = 'infer')
+
+# cmpy_reviews_docs_compressed_svd = pd.read_json('company_reviews_svd_docs.json', orient ='split', compression = 'infer')
+
+# cmpy_reviews_terms_compressed_svd = pd.read_json('company_reviews_svd_docs.json', orient ='split', compression = 'infer')
+
+# job_reviews_docs_compressed_svd = pd.read_json('job_reviews_svd_docs.json', orient ='split', compression = 'infer')
+
+# job_reviews_terms_compressed_svd = pd.read_json('job_reviews_svd_words.json', orient ='split', compression = 'infer')
+
+
 
 app = Flask(__name__)
 CORS(app)
@@ -76,6 +94,9 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
 
     # create df with token fields for each element in fields list
     tokenized_df = tokenize_df_fields(merged_df, fields, tokenize)
+
+    # The k for SVD
+    k = 50
     
 
     def build_inverted_index(df: pd.DataFrame, token_column_name: str) -> dict:
@@ -188,6 +209,7 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
         return norms
 
     def accumulate_dot_scores(query_word_counts: dict, index: dict, idf: dict) -> dict:
+        # print(cmpy_reviews_terms_compressed_svd.shape)
         """Perform a term-at-a-time iteration to efficiently compute the numerator term of cosine similarity across multiple documents.
 
         Arguments
@@ -219,7 +241,60 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
                     else:
                         ans[doc] = idf[key]*idf[key]*tf*query_word_counts[key]
         return ans
+    
 
+    # Returns top 3 matches for query
+    def testing_SVD(query):
+        # Tokenize query
+        job_descriptions = merged_df['job_description'].astype(str).tolist()
+
+        vectorizer = CountVectorizer()
+        X = vectorizer.fit_transform([query] + job_descriptions)
+        query_vector = X[0].toarray()
+
+        # Perform SVD
+        svd = TruncatedSVD(n_components=2)  # Reduce to 2 dimensions for example
+        svd.fit(X)
+        U = svd.transform(X)
+        Vt = svd.components_
+
+        # Transform query using SVD
+        query_transformed = np.dot(query_vector, Vt.T)
+
+        # Calculate cosine similarity with each job description
+        similarities = cosine_similarity(query_transformed, U[1:])
+
+        top_matches_idx = np.argsort(similarities[0])[::-1][:3]
+
+        # Get top 3 most similar job descriptions and their similarity scores
+        top_matches = [(job_descriptions[idx], similarities[0][idx]) for idx in top_matches_idx]
+        indices_with_relation_to_merged_df = [idx - 1 for idx in top_matches_idx]  # Subtract 1 for the query index
+
+        # Get rows from merged_df corresponding to the top matches
+        top_matches_df = merged_df.iloc[indices_with_relation_to_merged_df]
+        # Create an empty dictionary to store formatted results
+        descrips_top_matches = []
+
+        # Iterate through each row in top_matches_df
+        for index, row in top_matches_df.iterrows():
+            company = row['company_name']
+            # similarity_score = row['similarity_score']
+            
+            # Get relevant information from merged_df based on company name
+            industry = merged_df.loc[merged_df['company_name'] == company, 'company_industry'].values[0]
+            description = merged_df.loc[merged_df['company_name'] == company, 'company_description'].values[0]
+            headline = merged_df.loc[merged_df['company_name'] == company, 'headline'].values[0]
+            
+            # Store the formatted information as a tuple and append to the list
+            descrips_top_matches.append((company, industry, description, headline))
+
+
+
+
+        print(descrips_top_matches)
+        return descrips_top_matches
+
+    
     def index_search(tokenized_df,
         query: str,
         index: dict,
@@ -268,12 +343,20 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
         query = query.lower()
         query_tokens = tokenizer.tokenize(query)
 
+        # q_p = np.dot(query_tokens.T, terms_compressed_svd)
+        # svd(merged_df, query_tokens)
+        svdOutputs = testing_SVD(query)
+
+
+
         for word in query_tokens:
             if word in query_word_counts:
                 count = query_word_counts[word]
                 query_word_counts[word] = count + 1
             else:
                 query_word_counts[word] = 1
+
+        # print(get_q_from_word_counts(query_word_counts))
 
         scores = score_func(query_word_counts, index, idf)
 
@@ -291,19 +374,16 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
                 ans.append((scores[doc]/(query_norm*doc_norms[index]), doc))
 
         ans.sort(key = lambda x: x[0], reverse = True)
-        return ans
+        return ans, svdOutputs
+
 
     job_idf = compute_idf(job_description_inverted_index, len(tokenized_df))
-    # print(job_idf['overview'])
-    # print(job_idf['is']) # idf has word -> idf value
-    # print(job_description_inverted_index['overview']) # inv ind has word -> (job id, count)
 
     job_description_inverted_index = {key: val for key, val in job_description_inverted_index.items() if key in job_idf}  # prune the terms left out by idf
-    # print(len(job_description_inverted_index))
-    # print("tokenized_df length", len(tokenized_df))
+   
     job_doc_norms = compute_doc_norms(tokenized_df, job_description_inverted_index, job_idf, len(tokenized_df)) # currently only checking if idf is > 14.5 bc there are 155270 total terms, this lets it finish in 2 min
-    # print("job_doc_norms", len(job_doc_norms))
-    industry_results = index_search(tokenized_df, personalExperience_query, job_description_inverted_index, job_idf, job_doc_norms, accumulate_dot_scores, TreebankWordTokenizer())
+    
+    industry_results, svdOutputs = index_search(tokenized_df, personalExperience_query, job_description_inverted_index, job_idf, job_doc_norms, accumulate_dot_scores, TreebankWordTokenizer())
 
     job_set = set()
     top3_industries = []
@@ -329,7 +409,10 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
 
     company_doc_norms = compute_doc_norms(new_company_df, company_description_inverted_index, company_idf, len(tokenized_df))
 
-    company_results = index_search(new_company_df, personalValues_query, company_description_inverted_index, company_idf, company_doc_norms, accumulate_dot_scores, TreebankWordTokenizer())
+
+
+    company_results, svdOutputs_2 = index_search(new_company_df, personalValues_query, company_description_inverted_index, company_idf, company_doc_norms, accumulate_dot_scores, TreebankWordTokenizer())
+
 
 
     #Gets top 3 companies
@@ -384,7 +467,7 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
 
 # Total Output to send back to front end
 #  industry_list, descrips, industry_reviews
-    return [top3_industries, descrips, industry_reviews]
+    return [top3_industries, descrips, industry_reviews, svdOutputs]
 
 # Sample search using json with pandas
 def json_search(personalValues, personalSkills):
