@@ -288,25 +288,40 @@ h4 {
 }
 
 .reviews {
-    padding: 25px;
     margin-left: -20px;
+    padding-top: 0px;
     border-radius: 10px;
+    padding: 0px;
     background: #ffffff;
     box-sizing: border-box;
     transition: all 0.2s ease;
     color: #303030;
-    border-left: solid 20px #282828;
+    border-radius: 15px;
+    overflow: hidden;
 }
 
 .reviews.noReviews {
     opacity: 0.8 !important;
 }
 
+.reviews .review {
+    padding: 25px;
+    box-sizing: border-box;
+}
+
+
 .reviews .industry_reviews_header {
-    border-bottom: 1px solid gray;
-    padding-bottom: 8px;
-    font-weight: 500;
-    font-size: 14px;
+    /* border-bottom: 1px solid gray; */
+    border: 1px solid gray;
+    padding-bottom: 15px;
+    padding-top: 15px;
+    font-weight: 300;
+    background: #282828;
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 0px;
+    color: white;
+    margin-top: 0px;
 }
 
 .reviews .companyTitle {}
@@ -414,6 +429,11 @@ h4 {
 }
 
 .svdResult .industry {
+    font-size: 15px;
+    padding-bottom: 15px;
+}
+
+.svdResult .simScore {
     font-size: 15px;
     padding-bottom: 15px;
 }

@@ -49,7 +49,7 @@ app = Flask(__name__)
 CORS(app)
 def executeQuerySearch(personalValues_query, personalExperience_query):
     try:
-        k = 50
+    
 
         def tokenize(text: str) -> List[str]:
             """
@@ -190,7 +190,7 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
                 norms[i] = the norm of document i.
             """
             # TODO: Fix this up to be more formal in the future
-            norms = {num: 0 for num in range(60000)}
+            norms = {index: 0 for index in tokenized_df.index}
             #norms = np.zeros(n_docs) # the issue here is that the keys are job_id but this will go out of bounds for number of jobs
             # pandas .index
             # tokenized_df[jobs_list['job_id'] == tup[0]].index
@@ -246,8 +246,9 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
         
 
         # Returns top n matches for query
-        def SVD_search_jobs(query, n = 3):
+        def SVD_search_jobs(query, n = 3, k=50):
             # Tokenize query
+            # print("STARTING SVD")
             job_descriptions = merged_df['job_description'].astype(str).tolist()
 
             vectorizer = CountVectorizer()
@@ -287,7 +288,7 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
                 description = merged_df.loc[merged_df['company_name'] == company, 'company_description'].values[0]
                 headline = merged_df.loc[merged_df['company_name'] == company, 'headline'].values[0]
                 # Retrieve the similarity score for this particular match
-                print("HERE ARE TOP MATCHES LENGTH", len(top_matches),index)
+                # print("HERE ARE TOP MATCHES LENGTH", len(top_matches),index)
                 simScore = top_matches[indx][1]
                 
                 # Store the formatted information as a tuple and append to the list
@@ -308,7 +309,8 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
             idf,
             doc_norms,
             score_func,
-            tokenizer
+            tokenizer,
+            performSVD:bool=True
         ,
         ) -> List[Tuple[int, int]]:
             """Search the collection of documents for the given query
@@ -344,6 +346,7 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
 
             """
             # TODO-8.1
+            # print("STARTING INDEX SEARCH")
             ans = []
             query_word_counts = {}
 
@@ -352,7 +355,10 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
 
             # q_p = np.dot(query_tokens.T, terms_compressed_svd)
             # svd(merged_df, query_tokens)
-            svdOutputs = SVD_search_jobs(query)
+            svdOutputs = []
+            if performSVD:
+                svdOutputs = SVD_search_jobs(query)
+               
 
 
 
@@ -383,13 +389,15 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
             ans.sort(key = lambda x: x[0], reverse = True)
             return ans, svdOutputs
 
-
+        # print("COMPUTE IDF")
         job_idf = compute_idf(job_description_inverted_index, len(tokenized_df))
+        # print("COMPUTE job_description_inverted_index")
 
         job_description_inverted_index = {key: val for key, val in job_description_inverted_index.items() if key in job_idf}  # prune the terms left out by idf
-    
+        # print("COMPUTE job_doc_norms")
+
         job_doc_norms = compute_doc_norms(tokenized_df, job_description_inverted_index, job_idf, len(tokenized_df)) # currently only checking if idf is > 14.5 bc there are 155270 total terms, this lets it finish in 2 min
-        
+        # print("STARTING INDEX SEARCH")
         industry_results, svdOutputs = index_search(tokenized_df, personalExperience_query, job_description_inverted_index, job_idf, job_doc_norms, accumulate_dot_scores, TreebankWordTokenizer())
 
         job_set = set()
@@ -418,7 +426,7 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
 
 
 
-        company_results, svdOutputs_2 = index_search(new_company_df, personalValues_query, company_description_inverted_index, company_idf, company_doc_norms, accumulate_dot_scores, TreebankWordTokenizer())
+        company_results, svdOutputs_2 = index_search(new_company_df, personalValues_query, company_description_inverted_index, company_idf, company_doc_norms, accumulate_dot_scores, TreebankWordTokenizer(), False)
 
 
 
