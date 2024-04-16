@@ -309,6 +309,9 @@ h4 {
     box-sizing: border-box;
 }
 
+.reviews .no-review {
+    padding: 25px;
+}
 
 .reviews .industry_reviews_header {
     /* border-bottom: 1px solid gray; */
