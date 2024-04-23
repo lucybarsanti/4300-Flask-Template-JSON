@@ -1,3 +1,4 @@
+from collections import defaultdict
 import json
 import os
 from flask import Flask, render_template, request, jsonify
@@ -46,7 +47,7 @@ merged_df = pd.read_json('linkedin_glassdoor_job_id.json', orient ='split', comp
 
 app = Flask(__name__)
 CORS(app)
-def executeQuerySearch(personalValues_query, personalExperience_query):
+def executeQuerySearch(personalValues_query, personalExperience_query, num_return_industries=5, num_return_companies_per_industry=3):
     try:
     
 
@@ -94,7 +95,7 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
             return df
 
         # set the fields you'd like to tokenize
-        fields = ['job_description', 'company_description', 'job_industry']
+        fields = ['job_industry']
 
         # create df with token fields for each element in fields list
         tokenized_df = tokenize_df_fields(merged_df, fields, tokenize)
@@ -150,112 +151,19 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
 
             return inverted_index
 
-        # create inverted indexes
-        job_description_inverted_index = build_inverted_index(tokenized_df, 'job_description_tokens')
-        job_industry_inverted_index = build_inverted_index(tokenized_df, 'job_industry_tokens')
-
-        def compute_idf(inv_idx, n_docs):
-            """Compute term IDF values from the inverted index.
-
-            inv_idx: an inverted index
-            n_docs: int,
-                The number of documents.
-
-            Returns
-            =======
-
-            idf: dict
-                For each term, the dict contains the idf value.
-
-            """
-            ans = {}
-            for key in inv_idx:
-                doc_list = inv_idx[key]
-                val = math.log2((n_docs/(1+len(doc_list))))
-                ans[key] = val
-            return ans
-
-        def compute_doc_norms(tokenized_df, inv_idx, idf, n_docs):
-            """Precompute the euclidean norm of each document.
-
-            inv_idx: the inverted index as above
-            idf: dict,
-                Precomputed idf values for the terms.
-            n_docs: int,
-                The total number of documents.
-
-            Returns:
-            norms: dict
-                norms[i] = the norm of document i.
-            """
-            # TODO: Fix this up to be more formal in the future
-            norms = {index: 0 for index in tokenized_df.index}
-            #norms = np.zeros(n_docs) # the issue here is that the keys are job_id but this will go out of bounds for number of jobs
-            # pandas .index
-            # tokenized_df[jobs_list['job_id'] == tup[0]].index
-            for key in inv_idx:
-                if idf[key] > 12:
-                    doc_list = inv_idx[key]
-                    for tup in doc_list:
-                        if key in idf:
-                            index = tokenized_df[tokenized_df['job_id'] == tup[0]].index[0]
-                            if index in norms:
-                                norms[index] = norms[index] + (tup[1]*idf[key])**2
-                            else:
-                                norms[index] = (tup[1]*idf[key])**2
-
-            for key, value in norms.items():
-                norms[key] = np.sqrt(value)
-            #norms = np.sqrt(norms)
-            return norms
-
-        def accumulate_dot_scores(query_word_counts: dict, index: dict, idf: dict) -> dict:
-            # print(cmpy_reviews_terms_compressed_svd.shape)
-            """Perform a term-at-a-time iteration to efficiently compute the numerator term of cosine similarity across multiple documents.
-
-            Arguments
-            =========
-
-            query_word_counts: dict,
-                A dictionary containing all words that appear in the query;
-                Each word is mapped to a count of how many times it appears in the query.
-                In other words, query_word_counts[w] = the term frequency of w in the query.
-                You may safely assume all words in the dict have been already lowercased.
-
-            index: the inverted index as above,
-
-            idf: dict,
-                Precomputed idf values for the terms.
-            doc_scores: dict
-                Dictionary mapping from doc ID to the final accumulated score for that doc
-            """
-            # TODO-7.1
-            ans = {}
-            for key in query_word_counts:
-                if key in idf:
-                    doc_list = index[key]
-                    for (doc, tf) in doc_list:
-                        if doc in ans:
-                            val = ans[doc]
-                            val = val + idf[key]*idf[key]*tf*query_word_counts[key]
-                            ans[doc] = val
-                        else:
-                            ans[doc] = idf[key]*idf[key]*tf*query_word_counts[key]
-            return ans
-        
-
-        # Returns top n matches for query
-        def SVD_search_jobs(query, n = 3, k=50):
+    
+        # Returns top n matches for query in the form (company, industry, description, simScore)[] or (industry, simScore)[]
+        # Based on the col_title provided
+        def SVD_search_jobs(query, col_title, name_col, n = 3, k=50):
             # Tokenize query
             # print("STARTING SVD")
-            job_descriptions = merged_df['job_description'].astype(str).tolist()
-
+            description = merged_df[col_title].astype(str).tolist()
+            # print(merged_df)
             vectorizer = CountVectorizer()
-            X = vectorizer.fit_transform([query] + job_descriptions)
+            X = vectorizer.fit_transform([query] + description)
             query_vector = X[0].toarray()
-
             # Perform SVD
-            svd = TruncatedSVD(n_components=k)  # Reduce to 2 dimensions for example
+            svd = TruncatedSVD(n_components=k)  # Reduce to k dimensions for example
             svd.fit(X)
             U = svd.transform(X)
             Vt = svd.components_
@@ -263,13 +171,13 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
             # Transform query using SVD
             query_transformed = np.dot(query_vector, Vt.T)
 
-            # Calculate cosine similarity with each job description
+            # Calculate cosine similarity with each description
             similarities = cosine_similarity(query_transformed, U[1:])
 
             top_matches_idx = np.argsort(similarities[0])[::-1][:n]
 
-            # Get top 3 most similar job descriptions and their similarity scores
-            top_matches = [(job_descriptions[idx], similarities[0][idx]) for idx in top_matches_idx]
+            # Get top 3 most similar descriptions and their similarity scores
+            top_matches = [(description[idx], similarities[0][idx]) for idx in top_matches_idx]
             indices_with_relation_to_merged_df = [idx - 1 for idx in top_matches_idx]  # Subtract 1 for the query index
 
             # Get rows from merged_df corresponding to the top matches
@@ -279,19 +187,22 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
             indx = 0
             # Iterate through each row in top_matches_df
             for index, row in top_matches_df.iterrows():
-                company = row['company_name']
-                # similarity_score = row['similarity_score']
-                
-                # Get relevant information from merged_df based on company name
-                industry = merged_df.loc[merged_df['company_name'] == company, 'company_industry'].values[0]
-                description = merged_df.loc[merged_df['company_name'] == company, 'company_description'].values[0]
-                headline = merged_df.loc[merged_df['company_name'] == company, 'headline'].values[0]
+                company_or_industry = row[name_col]
                 # Retrieve the similarity score for this particular match
                 # print("HERE ARE TOP MATCHES LENGTH", len(top_matches),index)
                 simScore = top_matches[indx][1]
+                # similarity_score = row['similarity_score']
+                # Get relevant information from merged_df based on company name
+                if(col_title=='company_description'):
+                    industry = merged_df.loc[merged_df[name_col] == company_or_industry, 'company_industry'].values[0]
+                    description = merged_df.loc[merged_df[name_col] == company_or_industry, 'company_description'].values[0]
+                    # Store the formatted information as a tuple and append to the list
+                    descrips_top_matches.append((company_or_industry, industry, description, simScore))
+                else:
+                    # Store the formatted information as a tuple and append to the list
+                    descrips_top_matches.append((company_or_industry,  simScore))
                 
-                # Store the formatted information as a tuple and append to the list
-                descrips_top_matches.append((company, industry, description, headline, simScore))
+                
                 indx+=1
 
 
@@ -302,151 +213,56 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
             return descrips_top_matches
 
         
-        def index_search(tokenized_df,
-            query: str,
-            index: dict,
-            idf,
-            doc_norms,
-            score_func,
-            tokenizer,
-            performSVD:bool=True
-        ,
-        ) -> List[Tuple[int, int]]:
-            """Search the collection of documents for the given query
-
-            Arguments
-            =========
-
-            query: string,
-                The query we are looking for.
-
-            index: an inverted index as above
-
-            idf: idf values precomputed as above
-
-            doc_norms: document norms as computed above
-
-            score_func: function,
-                A function that computes the numerator term of cosine similarity (the dot product) for all documents.
-                Takes as input a dictionary of query word counts, the inverted index, and precomputed idf values.
-                (See Q7)
-
-            tokenizer: a TreebankWordTokenizer
-
-            Returns
-            =======
-
-            results, list of tuples (score, doc_id)
-                Sorted list of results such that the first element has
-                the highest score, and `doc_id` points to the document
-                with the highest score.
-
-            Note:
-
-            """
-            # TODO-8.1
-            # print("STARTING INDEX SEARCH")
-            ans = []
-            query_word_counts = {}
-
-            query = query.lower()
-            query_tokens = tokenizer.tokenize(query)
-
-            # q_p = np.dot(query_tokens.T, terms_compressed_svd)
-            # svd(merged_df, query_tokens)
-            svdOutputs = []
-            if performSVD:
-                svdOutputs = SVD_search_jobs(query)
-               
+           # print("COMPUTE IDF")
+        industry_results = SVD_search_jobs(personalExperience_query, 'job_industry_tokens', 'job_industry', 3000)
+        industry_results = list(set(industry_results))
 
 
+        company_results = SVD_search_jobs(personalValues_query, 'company_description',  'company_name', 1000)
+        company_results = list(set(company_results))
+       
+        # print("industry Results", industry_results)
+        # print('\n')
+        # print('company results', company_results)
 
-            for word in query_tokens:
-                if word in query_word_counts:
-                    count = query_word_counts[word]
-                    query_word_counts[word] = count + 1
-                else:
-                    query_word_counts[word] = 1
+        # Idea now is we have scores for industry and company.
+        # We want to find the maximum overlap of the two. We can group companies into industry categories
+        # We then take the top 3 companies of each industry scores and add it with the score of that industry (with the scaling of a weight for how much we should value each)
+        # We then take the top 3 industry+company sim score groups.
+        companies_grouped_by_industry_results = defaultdict(list)
+        for company, industry, description, simScore in company_results:
+            companies_grouped_by_industry_results[industry].append((company, description, simScore))
 
-            # print(get_q_from_word_counts(query_word_counts))
-
-            scores = score_func(query_word_counts, index, idf)
-
-            query_norm = 0
-            for key in query_word_counts:
-                if key in idf:
-                    val = query_word_counts[key]
-                    query_norm = query_norm + (idf[key]*val)**2
-            query_norm = np.sqrt(query_norm)
-
-            for doc in scores:
-                score = scores[doc] # id -> score, doc norms is index
-                index = tokenized_df[tokenized_df['job_id'] == doc].index[0]
-                if query_norm*doc_norms[index]>0:
-                    ans.append((scores[doc]/(query_norm*doc_norms[index]), doc))
-
-            ans.sort(key = lambda x: x[0], reverse = True)
-            return ans, svdOutputs
-
-        # print("COMPUTE IDF")
-        job_idf = compute_idf(job_description_inverted_index, len(tokenized_df))
-        # print("COMPUTE job_description_inverted_index")
-
-        job_description_inverted_index = {key: val for key, val in job_description_inverted_index.items() if key in job_idf}  # prune the terms left out by idf
-        # print("COMPUTE job_doc_norms")
-
-        job_doc_norms = compute_doc_norms(tokenized_df, job_description_inverted_index, job_idf, len(tokenized_df)) # currently only checking if idf is > 14.5 bc there are 155270 total terms, this lets it finish in 2 min
-        # print("STARTING INDEX SEARCH")
-        industry_results, svdOutputs = index_search(tokenized_df, personalExperience_query, job_description_inverted_index, job_idf, job_doc_norms, accumulate_dot_scores, TreebankWordTokenizer())
-
-        job_set = set()
-        top3_industries = []
-        count = 0
+        # Sort companies within each industry group by simScore
+        for industry, companies in companies_grouped_by_industry_results.items():
+            companies_grouped_by_industry_results[industry] = sorted(companies, key=lambda x: x[2], reverse=True)
 
 
-        for tup in industry_results:
-            if count >= 3:
-                break
-            id = tup[1]
-            if (tokenized_df.loc[tokenized_df['job_id'] == id, 'job_industry'].values[0]) not in job_set:
-                top3_industries.append(tokenized_df.loc[tokenized_df['job_id'] == id, 'job_industry'].values[0])
-                job_set.add(tokenized_df.loc[tokenized_df['job_id'] == id, 'job_industry'].values[0])
-                count +=1
+        # # Convert defaultdict to regular dictionary if needed
+        # companies_grouped_by_industry_results = dict(companies_grouped_by_industry_results)
 
-        new_company_df = tokenized_df.drop(tokenized_df[~tokenized_df['company_industry'].isin(top3_industries)].index, inplace=False)
+        combinedScores = []
+        company_weight = 1
+        industry_weight = 1
+        # Print the grouped results
+        for  industry, industry_simScore in industry_results:
+            companies = companies_grouped_by_industry_results.get(industry)
+            if companies:
+                # Take the average of top num_return_companies_per_industry companies' simScores
+                top_companies = companies[:num_return_companies_per_industry] if len(companies) >= num_return_companies_per_industry else companies
+                avg_company_score = sum(company[2] for company in top_companies) / len(top_companies)
+                # Calculate weighted score
+                weighted_score = (avg_company_score * company_weight + industry_simScore * industry_weight)/(company_weight+industry_weight)
+                combinedScores.append((industry, weighted_score, top_companies))
+        combinedScores.sort(key=lambda x: x[1], reverse=True)
 
-        company_description_inverted_index = build_inverted_index(new_company_df, 'company_description_tokens')
+        # Step 1, comb through company_results, group into industry (taking only the top 3 score companies for each industry)
 
-        company_idf = compute_idf(company_description_inverted_index, len(tokenized_df))
-
-        company_description_inverted_index = {key: val for key, val in company_description_inverted_index.items() if key in company_idf}
-
-        company_doc_norms = compute_doc_norms(new_company_df, company_description_inverted_index, company_idf, len(tokenized_df))
-
-
-
-        company_results, svdOutputs_2 = index_search(new_company_df, personalValues_query, company_description_inverted_index, company_idf, company_doc_norms, accumulate_dot_scores, TreebankWordTokenizer(), False)
-
-
-
-        #Gets top 3 companies
-        company_set = set()
-        company_list = []
-        count = 0
-        index = 0
-
-        while count < min(len(company_results), 3):
-            id = company_results[index][1]
-            if tokenized_df.loc[tokenized_df['job_id'] == id, 'company_name'].values[0] not in company_set:
-                company_list.append(tokenized_df.loc[tokenized_df['job_id'] == id, 'company_name'].values[0])
-                count+=1
-                company_set.add(tokenized_df.loc[tokenized_df['job_id'] == id, 'company_name'].values[0])
-            index+=1
-
-        # gets top company descriptions for top 3 companies
+        
+        # gets top company descriptions for top num_return_companies_per_industry companies
         # Dict that goes from top company name to company's industry and that company's description
         #  TODO: Add review as a 3rd part of this dict
-        descrips = {company: (tokenized_df.loc[tokenized_df['company_name'] == company, 'company_industry'].values[0], tokenized_df.loc[tokenized_df['company_name'] == company, 'company_description'].values[0], tokenized_df.loc[tokenized_df['company_name'] == company, 'headline'].values[0]) for company in company_list}
+        # descrips = {company: (tokenized_df.loc[tokenized_df['company_name'] == company, 'company_industry'].values[0], tokenized_df.loc[tokenized_df['company_name'] == company, 'company_description'].values[0], tokenized_df.loc[tokenized_df['company_name'] == company, 'headline'].values[0]) for company in company_list}
         
         def get_random_reviews(reviews_df: pd.DataFrame, industry: str, num_reviews: int = 3) -> pd.DataFrame:
 
@@ -469,19 +285,18 @@ def executeQuerySearch(personalValues_query, personalExperience_query):
         
         # get 3 reviews for each industry, returns dict with list of 3 review headlines
         industry_reviews = {}
-        for industry in top3_industries:
+        for industry, _, _ in combinedScores[:num_return_industries]:
             reviews = get_random_reviews(tokenized_df, industry)
             industry_reviews[industry] = reviews
-        
 
-    # for company in company_list:
-    #   company_description = tokenized_df.loc[tokenized_df['company_name'] == company, 'company_description'].values
-    #   descrips.append(company_description[0]) #I AM NOT SURE WHICH INDEX OF THIS LIST WE WANT TO PRINT-- I CANT PRINT RN SO CAN'T SEE WHAT THIS GIVES US
 
 
     # Total Output to send back to front end
     #  industry_list, descrips, industry_reviews
-        return [top3_industries, descrips, industry_reviews, svdOutputs]
+    # scores is of type (industry, weighted_score, top_companies)[]
+    # top_companies is of type (company, description, simScore)[]
+        return {'scores': combinedScores[:num_return_industries], 'reviews': industry_reviews}
+
     except Exception as e:
         # Log the exception or handle it in an appropriate way
         print("An error occurred during query search:", e)
@@ -509,7 +324,7 @@ def episodes_search():
     try:
         personalSkills = request.args.get("personalSkills")
         personalValues = request.args.get("personalValues")
-        print(personalSkills, personalValues)
+        # print(personalSkills, personalValues)
         return json_search(personalValues, personalSkills)
     except Exception as e:
         # Log the exception or handle it in an appropriate way

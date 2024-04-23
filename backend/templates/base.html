@@ -145,7 +145,7 @@
         //     document.getElementById("salaryOutput").textContent = "$" + value;
         // }
 
-        function answerBoxTemplate(title, industry, titleDesc, rating) {
+        function answerBoxTemplate(title, industry, titleDesc) {
             return `<div class='answer_resp'>
                 <h3 class='episode-title'>${title}</h3>
                 <p class='episode-desc'>${titleDesc}</p>
@@ -170,53 +170,25 @@
         }
 
         function setupResultsDisplay(data) {
-            const insertSVDResults = () => {
-                let svd_containerDiv = document.createElement("div")
-                svd_containerDiv.classList.add('fadeIn')
-                svd_containerDiv.classList.add('svdResultsContainer')
-                svd_containerDiv.classList.add('industryRsltContainer')
-                svd_containerDiv.style = '--color:#0a66c2'
-
-                document.getElementById("answer-box").appendChild(svd_containerDiv)
-                let SVD_results_title = document.createElement("div")
-                SVD_results_title.classList.add('SVD_results_title')
-                SVD_results_title.innerHTML = 'SVD Company Results'
-                svd_containerDiv.appendChild(SVD_results_title)
-
-                for (let svdResult of svdDataList) {
-                    // console.log("HERE IS SVD RESULT", svdDataList);
-                    let svd_result_div = document.createElement("div")
-                    svd_result_div.classList.add('svdResult')
-                    svd_result_div.innerHTML = `
-                                <div class="title"> ${svdResult[0]} </div>
-                                <div class="industry">Industry: ${svdResult[1]}</div>
-                                <div class="simScore">Similarity Score: ${svdResult[4]}</div>
-                                <div class="descr">${svdResult[2]}</div>`
-                    svd_containerDiv.appendChild(svd_result_div)
-                    // industryTitleContainer.innerHTML = '<div class="industryPathTitle">SVD Matched Company</div>' + 
-                    // document.getElementById(industry).appendChild(industryTitleContainer)
-
-
-                }
-            }
-            const uniqueIndustries = new Set();
             industryColors = [1, 2, 3, 4]
             let prevColor = ''
             let industryColorsShuffled = shuffleArray(industryColors)
-            let industry_list = data[0]
-            let descrips = data[1]
-            let industry_reviews = data[2]
-            let svdDataList = data[3]
+            let industry_company_scores_grouping = data['scores']
 
-            insertSVDResults();
+            //  industry_company_scores_grouping is of type (industry, weighted_score, top_companies)[]
+            // top_companies is of type (company, description, simScore)[]
+            let industry_reviews = data['reviews']
+            // <div class="simScore">Similarity Score: ${svdResult[4]}</div>
 
-            for (let industry of industry_list) {
-
-                let col = `var(--col_${industryColorsShuffled[industry_list.indexOf(industry) % 4]})`;
-
+            industry_company_scores_grouping.forEach((grouping, indx) => {
+                console.log("HERE IS GROUPING", grouping)
+                let col = `var(--col_${industryColorsShuffled[indx % 4]})`;
+                let industry = grouping[0]
+                let weighted_score = grouping[1]
+                let companies = grouping[2]
+                console.log(industry, weighted_score, companies)
                 prevColor = col;
-                industryColors.push({ industry: industry, industryNum: industryColors.length + 1, color: col })
-                uniqueIndustries.add(industry)
+                industryColors.push({ industry: industry, industryNum: industry_company_scores_grouping.length + 1, color: col })
 
                 //Generating the resp industry container div
                 let containerDiv = document.createElement("div")
@@ -233,21 +205,19 @@
                 industryTitleContainer.innerHTML = '<div class="industryPathTitle">Matched Industry Path: </div>' + industry
                 document.getElementById(industry).appendChild(industryTitleContainer)
 
-                for (let companyName in descrips) {
-                    let companyDescripSet = descrips[companyName];
-                    let company_industry = companyDescripSet[0];
-                    // console.log("HERE IS COMPANY NAME", companyName, company_industry, industry)
+                for (let company of companies) {
+                    let company_industry = industry;
+                    // top_companies is of type (company, description, simScore)[]
+                    let companyName = company[0]
+                    let company_description = company[1]
+                    let company_sim_score = company[2]
+                    let tempDiv = document.createElement("div")
+                    tempDiv.classList.add('fadeIn')
+                    tempDiv.classList.add('indvRsltContainer')
+                    // console.log("MATCH!", companyName)
+                    tempDiv.innerHTML = answerBoxTemplate(companyName, company_industry, company_description)
+                    document.getElementById(company_industry).appendChild(tempDiv)
 
-                    if (company_industry == industry) {
-                        let tempDiv = document.createElement("div")
-                        tempDiv.classList.add('fadeIn')
-                        tempDiv.classList.add('indvRsltContainer')
-                        // console.log("MATCH!", companyName)
-                        let company_description = companyDescripSet[1]
-                        let company_review = companyDescripSet[2]
-                        tempDiv.innerHTML = answerBoxTemplate(companyName, company_industry, company_description, company_review ? companyReview : 'No Reviews :(')
-                        document.getElementById(company_industry).appendChild(tempDiv)
-                    }
                 }
 
                 // display 3 reviews per industry
@@ -292,7 +262,7 @@
                 }
                 document.getElementById("answer-box").scrollIntoView({ behavior: "smooth" })
                 document.getElementById('searchButton').innerHTML = 'Search'
-            }
+            })
 
         }
 
