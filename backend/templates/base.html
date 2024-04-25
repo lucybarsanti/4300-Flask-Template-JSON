@@ -224,19 +224,35 @@
                 let industryReviewsDiv = document.createElement("div");
                 industryReviewsDiv.classList.add('reviews');
                 industryReviewsDiv.classList.add('fadeIn')
-
-                industryReviewsDiv.innerHTML = `<h3 class="industry_reviews_header">Industry Reviews</h3>`;
+                industryReviewsDiv.innerHTML = `<h3 class="industry_reviews_header">Reviews from other companies within this Industry</h3>`;
 
                 let reviews = industry_reviews[industry];
-                console.log(reviews);
+
                 if (reviews && reviews.length > 0) {
                     reviews.forEach(review => {
                         let reviewDiv = document.createElement("div");
                         reviewDiv.classList.add('review');
                         let companyName = review[0];
                         let reviewHeadlines = review[1].split(/, (?=[A-Z])/);
+                        let number_of_stars = review[2]
 
-                        let reviewHtml = `<p class="companyTitle"><strong>${companyName}:</strong></p>`;
+                        if (number_of_stars == 1) {
+                            companyName += ": ⭐";
+                        }
+                        if (number_of_stars == 2) {
+                            companyName += ": ⭐⭐";
+                        }
+                        if (number_of_stars == 3) {
+                            companyName += ": ⭐⭐⭐";
+                        }
+                        if (number_of_stars == 4) {
+                            companyName += ": ⭐⭐⭐⭐";
+                        }
+                        if (number_of_stars == 5) {
+                            companyName += ": ⭐⭐⭐⭐⭐";
+                        }
+
+                        let reviewHtml = `<p class="companyTitle"><strong>${companyName}</strong></p>`;
 
                         reviewHeadlines.forEach(headline => {
                             reviewHtml += `<li class="reviewLine">${headline}</li>`;

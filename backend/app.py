@@ -29,11 +29,11 @@ os.environ['ROOT_PATH'] = os.path.abspath(os.path.join("..",os.curdir))
 current_directory = os.path.dirname(os.path.abspath(__file__))
 
 # Specify the path to the JSON file relative to the current script
-json_file_path = os.path.join(current_directory, 'linkedin_glassdoor_job_id.json')
+json_file_path = os.path.join(current_directory, 'linkedin_glassdoor_final.json')
 
 # Assuming your JSON data is stored in a file named 'init.json'
 # with open(json_file_path, 'r') as file:
-merged_df = pd.read_json('linkedin_glassdoor_job_id.json', orient ='split', compression = 'infer')
+merged_df = pd.read_json('linkedin_glassdoor_final.json', orient ='split', compression = 'infer')
 
 # cmpy_reviews_docs_compressed_svd = pd.read_json('company_reviews_svd_docs.json', orient ='split', compression = 'infer')
 
@@ -270,20 +270,20 @@ def executeQuerySearch(personalValues_query, personalExperience_query, num_retur
             filtered_reviews = reviews_df.loc[
             (reviews_df['company_industry'] == industry) & 
             (reviews_df['headline'].notna())
-            ][['company_name', 'headline']].drop_duplicates(subset=['headline'], keep='first')
+            ][['company_name', 'headline', 'overall_rating']].drop_duplicates(subset=['headline'], keep='first')
 
             # if no reviews for industry, return empty df
             if filtered_reviews.empty:
                 return []
             
             if len(filtered_reviews) <= num_reviews:
-                return filtered_reviews.apply(lambda x: [x['company_name'], x['headline']], axis=1).tolist()
+                return filtered_reviews.apply(lambda x: [x['company_name'], x['headline'], x['overall_rating']], axis=1).tolist()
             
             # randomly select reviews and return
             random_reviews = filtered_reviews.sample(n=num_reviews)
-            return random_reviews.apply(lambda x: [x['company_name'], x['headline']], axis=1).tolist()
+            return random_reviews.apply(lambda x: [x['company_name'], x['headline'], x['overall_rating']], axis=1).tolist()
         
-        # get 3 reviews for each industry, returns dict with list of 3 review headlines
+        # get 3 reviews for each industry, returns dict with list of 3 review headlines and overall rating
         industry_reviews = {}
         for industry, _, _ in combinedScores[:num_return_industries]:
             reviews = get_random_reviews(tokenized_df, industry)
