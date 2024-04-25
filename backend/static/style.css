@@ -25,6 +25,15 @@ body {
     transform: scale(1.025);
 }
 
+.svdResult:hover {
+    transform: scale(1.025);
+}
+
+.reviews:hover {
+    transform: scale(1.025);
+}
+
+
 .industryRsltContainer {
     display: flex;
     flex-direction: column;
@@ -278,6 +287,53 @@ h4 {
     align-items: center;
 }
 
+.reviews {
+    margin-left: -20px;
+    padding-top: 0px;
+    border-radius: 10px;
+    padding: 0px;
+    background: #ffffff;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    color: #303030;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.reviews.noReviews {
+    opacity: 0.8 !important;
+}
+
+.reviews .review {
+    padding: 25px;
+    box-sizing: border-box;
+}
+
+.reviews .no-reviews {
+    padding: 25px;
+}
+
+.reviews .industry_reviews_header {
+    /* border-bottom: 1px solid gray; */
+    border: 1px solid gray;
+    padding-bottom: 15px;
+    padding-top: 15px;
+    font-weight: 300;
+    background: #282828;
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 0px;
+    color: white;
+    margin-top: 0px;
+}
+
+.reviews .companyTitle {}
+
+.reviews .reviewLine {
+    margin-left: 10px;
+    font-size: 12px;
+}
+
 .searchBtn {
     /* position: absolute; */
     width: 45%;
@@ -322,7 +378,6 @@ h4 {
     display: flex;
     gap: 20px;
 
-
     /* Revert */
     display: none;
 }
@@ -360,7 +415,42 @@ h4 {
     width: 100%;
     box-sizing: border-box;
     margin-left: -20px;
-    border-left: solid 20px #dcdcdc;
+    border-left: solid 20px #282828;
+}
+
+.SVD_results_title {
+    color: white;
+    font-size: 26px;
+    padding-bottom: 15px;
+    border-bottom: solid #ffffff6b 1px;
+    margin-bottom: 12px;
+}
+
+.svdResult .title {
+    font-size: 20px;
+    padding-bottom: 15px;
+}
+
+.svdResult .industry {
+    font-size: 15px;
+    padding-bottom: 15px;
+}
+
+.svdResult .simScore {
+    font-size: 15px;
+    padding-bottom: 15px;
+}
+
+.svdResult {
+    --color: #795548;
+    padding: 25px;
+    margin-left: -20px;
+    border-radius: 10px;
+    background: #ffffff;
+    box-sizing: border-box;
+    color: #303030;
+    transition: all 0.2s ease;
+    border-left: solid 20px #282828;
 }
 
 .payRange .slider {
